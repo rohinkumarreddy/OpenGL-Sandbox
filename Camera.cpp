@@ -26,6 +26,11 @@ glm::mat4 Camera::getWorldToViewMtx() const
 	return glm::lookAt(m_Position, m_Position + m_ViewDirection, m_Up);
 }
 
+glm::vec3 Camera::getPosition() const
+{
+	return m_Position;
+}
+
 void Camera::mouseUpdate(const glm::vec2& newMousePos)
 {
 	const float MOUSE_MOUSE_SPEED = 0.005f;

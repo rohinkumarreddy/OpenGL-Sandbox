@@ -68,6 +68,12 @@
     <None Include="FragmentShader.glsl">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="VertexShaderPT.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="FragmentShaderPT.glsl">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vertex.h">

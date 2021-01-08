@@ -188,7 +188,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="FragmentShader.glsl" />
+    <None Include="FragmentShaderPT.glsl" />
     <None Include="VertexShader.glsl" />
+    <None Include="VertexShaderPT.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
