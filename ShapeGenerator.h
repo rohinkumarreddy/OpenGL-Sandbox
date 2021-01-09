@@ -8,13 +8,16 @@ public:
 	static ShapeData makeTriangle();
 	static ShapeData makeCube();
 	static ShapeData makeArrow();
+	static ShapeData makeTorus(unsigned int tesselation = 20);
+	static ShapeData makeSphere(unsigned int tesselation = 20);
 	static ShapeData makePlane(unsigned int dimensions = 10);
 	static ShapeData makeTeapot(unsigned int tesselation = 10, const glm::mat4& lidTransform = glm::mat4(1.0f));
-	static ShapeData generateNormals(const ShapeData data);
+	static ShapeData generateNormals(const ShapeData& data);
 
 private:
 	static ShapeData makePlaneVerts(unsigned int dimensions);
 	static ShapeData makePlaneIndices(unsigned int dimensions);
+	static ShapeData makePlaneUnseamedIndices(unsigned int tesselation);
 
 	//Teapot helpers
 	static void generatePatches(float* v, float* n, float* tc, unsigned short* el, int grid);

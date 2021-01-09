@@ -46,27 +46,45 @@ bool GLLogCall(const char* function, const char* file, int line)
 
 DrawWidget::DrawWidget(QWidget* parent)
 : QGLWidget(parent),
+m_pCamera(new Camera),
 m_Sh1Vao(NULL),
+m_Sh1VtxOff(NULL),
+m_Sh1IndxOff(NULL),
 m_Sh2Vao(NULL),
+m_Sh2VtxOff(NULL),
+m_Sh2IndxOff(NULL),
 m_Sh3Vao(NULL),
+m_Sh3VtxOff(NULL),
+m_Sh3IndxOff(NULL),
 m_Sh4Vao(NULL),
+m_Sh4VtxOff(NULL),
+m_Sh4IndxOff(NULL),
+m_Sh5Vao(NULL),
+m_Sh5VtxOff(NULL),
+m_Sh5IndxOff(NULL),
+m_Sh6Vao(NULL),
+m_Sh6VtxOff(NULL),
+m_Sh6IndxOff(NULL),
 m_VIbo(NULL),
 m_Program(NULL),
 m_ProgramPT(NULL),
+m_u_MVPMtxLoc(NULL),
+m_u_ambientLightLoc(NULL),
+m_u_lightPosLoc(NULL),
+m_u_eyePosLoc(NULL),
+m_u_MWMtxLoc(NULL),
+m_u_MVPMtxPTLoc(NULL),
+m_VertexShaderSrc(""),
+m_FragmentShaderSrc(""),
+m_VertexShaderPTSrc(""),
+m_FragmentShaderPTSrc(""),
 m_NumTri(1),
 m_Sh1NumIndcs(NULL),
 m_Sh2NumIndcs(NULL),
 m_Sh3NumIndcs(NULL),
 m_Sh4NumIndcs(NULL),
-m_Sh1VtxOff(NULL),
-m_Sh1IndxOff(NULL),
-m_Sh2VtxOff(NULL),
-m_Sh2IndxOff(NULL),
-m_Sh3VtxOff(NULL),
-m_Sh3IndxOff(NULL),
-m_Sh4VtxOff(NULL),
-m_Sh4IndxOff(NULL),
-m_pCamera(new Camera)
+m_Sh5NumIndcs(NULL),
+m_Sh6NumIndcs(NULL)
 {
 }
 
@@ -87,6 +105,10 @@ DrawWidget::~DrawWidget()
 		glDeleteVertexArrays(1, &m_Sh3Vao);
 	if (m_Sh4Vao)
 		glDeleteVertexArrays(1, &m_Sh4Vao);
+	if (m_Sh5Vao)
+		glDeleteVertexArrays(1, &m_Sh5Vao);
+	if (m_Sh6Vao)
+		glDeleteVertexArrays(1, &m_Sh6Vao);
 
 	glUseProgram(0);
 
@@ -179,6 +201,8 @@ void DrawWidget::initOpenGLData()
 	ShapeData arrow = ShapeGenerator::makeArrow();
 	ShapeData plane = ShapeGenerator::makePlane(20);
 	ShapeData cube = ShapeGenerator::makeCube();
+	ShapeData torus = ShapeGenerator::makeTorus(50);
+	ShapeData sphere = ShapeGenerator::makeSphere(50);
 
 	/* Vertex buffer object */
 	GLCALL(glGenBuffers(1, &m_VIbo));
@@ -187,7 +211,9 @@ void DrawWidget::initOpenGLData()
 		teapot.vertexBufferSize() + teapot.indexBufferSize() +
 		arrow.vertexBufferSize() + arrow.indexBufferSize() +
 		plane.vertexBufferSize() + plane.indexBufferSize() +
-		cube.vertexBufferSize() + cube.indexBufferSize(),
+		cube.vertexBufferSize() + cube.indexBufferSize() +
+		torus.vertexBufferSize() + torus.indexBufferSize() +
+		sphere.vertexBufferSize() + sphere.indexBufferSize(),
 		0, GL_STATIC_DRAW));
 
 	GLsizeiptr curOffset = 0;
@@ -251,16 +277,50 @@ void DrawWidget::initOpenGLData()
 		cube.indexBufferSize(), cube.indices));
 	curOffset += cube.indexBufferSize();
 
+	m_Sh5VtxOff = curOffset;
+
+	/* Shape 5 data */
+	//Vertex data
+	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
+		torus.vertexBufferSize(), torus.vertices));
+	curOffset += torus.vertexBufferSize();
+
+	m_Sh5IndxOff = curOffset;
+
+	//Index data
+	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
+		torus.indexBufferSize(), torus.indices));
+	curOffset += torus.indexBufferSize();
+
+	m_Sh6VtxOff = curOffset;
+
+	/* Shape 6 data */
+	//Vertex data
+	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
+		sphere.vertexBufferSize(), sphere.vertices));
+	curOffset += sphere.vertexBufferSize();
+
+	m_Sh6IndxOff = curOffset;
+
+	//Index data
+	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
+		sphere.indexBufferSize(), sphere.indices));
+	curOffset += sphere.indexBufferSize();
+
 	m_Sh1NumIndcs = teapot.numIndices;
 	m_Sh2NumIndcs = arrow.numIndices;
 	m_Sh3NumIndcs = plane.numIndices;
 	m_Sh4NumIndcs = cube.numIndices;
+	m_Sh5NumIndcs = torus.numIndices;
+	m_Sh6NumIndcs = sphere.numIndices;
 
 	/* Clean up */
 	teapot.cleanUp();
 	arrow.cleanUp();
 	plane.cleanUp();
 	cube.cleanUp();
+	torus.cleanUp();
+	sphere.cleanUp();
 
 	/*
 	* Attribute data can also be sent to shader
@@ -282,6 +342,8 @@ void DrawWidget::initVertexArrays()
 	GLCALL(glGenVertexArrays(1, &m_Sh2Vao));
 	GLCALL(glGenVertexArrays(1, &m_Sh3Vao));
 	GLCALL(glGenVertexArrays(1, &m_Sh4Vao));
+	GLCALL(glGenVertexArrays(1, &m_Sh5Vao));
+	GLCALL(glGenVertexArrays(1, &m_Sh6Vao));
 
 	/* Vertex array object */
 	GLCALL(glBindVertexArray(m_Sh1Vao));
@@ -382,6 +444,56 @@ void DrawWidget::initVertexArrays()
 	//attribute-2|normal
 	GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
 		(const void*)(m_Sh4VtxOff + 6 * sizeof(float))));
+
+	/* Vertex array object */
+	GLCALL(glBindVertexArray(m_Sh5Vao));
+
+	/* Vertex buffer object */
+	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VIbo));
+
+	/* Index buffer object */
+	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VIbo));
+
+	GLCALL(glEnableVertexAttribArray(0));
+	GLCALL(glEnableVertexAttribArray(1));
+	GLCALL(glEnableVertexAttribArray(2));
+
+	//attribute-0|position
+	GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
+		(const void*)(m_Sh5VtxOff)));//4th element is by default 1.0f
+
+	//attribute-1|color
+	GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
+		(const void*)(m_Sh5VtxOff + 3 * sizeof(float))));
+
+	//attribute-2|normal
+	GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
+		(const void*)(m_Sh5VtxOff + 6 * sizeof(float))));
+
+	/* Vertex array object */
+	GLCALL(glBindVertexArray(m_Sh6Vao));
+
+	/* Vertex buffer object */
+	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VIbo));
+
+	/* Index buffer object */
+	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VIbo));
+
+	GLCALL(glEnableVertexAttribArray(0));
+	GLCALL(glEnableVertexAttribArray(1));
+	GLCALL(glEnableVertexAttribArray(2));
+
+	//attribute-0|position
+	GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
+		(const void*)(m_Sh6VtxOff)));//4th element is by default 1.0f
+
+	//attribute-1|color
+	GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
+		(const void*)(m_Sh6VtxOff + 3 * sizeof(float))));
+
+	//attribute-2|normal
+	GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
+		(const void*)(m_Sh6VtxOff + 6 * sizeof(float))));
 }
 
 void DrawWidget::drawIncTriangle()
@@ -638,9 +750,6 @@ void DrawWidget::paintGL()
 	GLCALL(glUniform3f(m_u_lightPosLoc,
 		lightPos.r, lightPos.g, lightPos.b));
 
-	/* Select shader program */
-	GLCALL(glUseProgram(m_Program));
-
 	/* Bind VAO */
 	GLCALL(glBindVertexArray(m_Sh1Vao));
 
@@ -660,23 +769,6 @@ void DrawWidget::paintGL()
 	//Draw teapot-1
 	/*GLCALL(glDrawElements(GL_TRIANGLES, m_Sh1NumIndcs,
 						  GL_UNSIGNED_SHORT, (const void*)m_Sh1IndxOff));*/
-
-	//teapot-2
-	shModelMtx = glm::translate(glm::vec3(3.0f, 0.0f, -6.75f)) *
-							glm::rotate(glm::radians(-90.0f),
-							glm::vec3(1.0f, 0.0f, 0.0f));//model to world
-	MVPMtx = VPMtx * shModelMtx;//model to projection
-
-	//Set Uniform
-	GLCALL(glUniformMatrix4fv(m_u_MVPMtxLoc, 1, GL_FALSE, &MVPMtx[0][0]));//model to projection
-	GLCALL(glUniformMatrix4fv(m_u_MWMtxLoc, 1, GL_FALSE, &shModelMtx[0][0]));//model to world
-
-	//Draw teapot-2
-	/*GLCALL(glDrawElements(GL_TRIANGLES, m_Sh1NumIndcs,
-						  GL_UNSIGNED_SHORT, (const void*)m_Sh1IndxOff));*/
-
-	/* Select shader program */
-	GLCALL(glUseProgram(m_Program));
 
 	/* Bind VAO */
 	GLCALL(glBindVertexArray(m_Sh2Vao));
@@ -698,21 +790,6 @@ void DrawWidget::paintGL()
 	/*GLCALL(glDrawElements(GL_TRIANGLES, m_Sh2NumIndcs, GL_UNSIGNED_SHORT,
 		(const void*)m_Sh2IndxOff));*/
 
-	//Shape-2|arrow-2
-	shModelMtx = glm::mat4(1.0f);//model to world
-	MVPMtx = VPMtx * shModelMtx;//model to projection
-
-	//Set Uniform
-	GLCALL(glUniformMatrix4fv(m_u_MVPMtxLoc, 1, GL_FALSE, &MVPMtx[0][0]));//model to projection
-	GLCALL(glUniformMatrix4fv(m_u_MWMtxLoc, 1, GL_FALSE, &shModelMtx[0][0]));//model to world
-
-	//Draw shape-2|arrow-2
-	/*GLCALL(glDrawElements(GL_TRIANGLES, m_Sh2NumIndcs, GL_UNSIGNED_SHORT,
-		(const void*)m_Sh2IndxOff));*/
-
-	/* Select shader program */
-	GLCALL(glUseProgram(m_Program));
-
 	/* Bind VAO */
 	GLCALL(glBindVertexArray(m_Sh3Vao));
 
@@ -720,9 +797,7 @@ void DrawWidget::paintGL()
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
 
 	//Shape-3|plane
-	shModelMtx = glm::translate(glm::vec3(0.0f, 0.0f, 0.0f)) *
-		glm::rotate(glm::radians(0.0f),
-			glm::vec3(0.0f, 1.0f, 0.0f));//model to world
+	shModelMtx = glm::mat4(1.0f);//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
@@ -732,6 +807,42 @@ void DrawWidget::paintGL()
 	//Draw shape-3
 	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh3NumIndcs, GL_UNSIGNED_SHORT,
 		(const void*)m_Sh3IndxOff));
+	
+	/* Bind VAO */
+	GLCALL(glBindVertexArray(m_Sh5Vao));
+
+	/* Bind IBO */
+	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
+
+	//Shape-5|torus
+	shModelMtx = glm::mat4(1.0f);//model to world
+	MVPMtx = VPMtx * shModelMtx;//model to projection
+
+	//Set Uniform
+	GLCALL(glUniformMatrix4fv(m_u_MVPMtxLoc, 1, GL_FALSE, &MVPMtx[0][0]));//model to projection
+	GLCALL(glUniformMatrix4fv(m_u_MWMtxLoc, 1, GL_FALSE, &shModelMtx[0][0]));//model to world
+
+	//Draw shape-5
+	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh5NumIndcs, GL_UNSIGNED_SHORT,
+		(const void*)m_Sh5IndxOff));
+
+	/* Bind VAO */
+	GLCALL(glBindVertexArray(m_Sh6Vao));
+
+	/* Bind IBO */
+	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
+
+	//Shape-6|sphere
+	shModelMtx = glm::translate(glm::vec3(3.0f, 3.0f, 3.0f));//model to world
+	MVPMtx = VPMtx * shModelMtx;//model to projection
+
+	//Set Uniform
+	GLCALL(glUniformMatrix4fv(m_u_MVPMtxLoc, 1, GL_FALSE, &MVPMtx[0][0]));//model to projection
+	GLCALL(glUniformMatrix4fv(m_u_MWMtxLoc, 1, GL_FALSE, &shModelMtx[0][0]));//model to world
+
+	//Draw shape-6
+	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh6NumIndcs, GL_UNSIGNED_SHORT,
+		(const void*)m_Sh6IndxOff));
 
 	/* Select shader program */
 	GLCALL(glUseProgram(m_ProgramPT));
@@ -749,7 +860,7 @@ void DrawWidget::paintGL()
 	//Set Uniform
 	GLCALL(glUniformMatrix4fv(m_u_MVPMtxPTLoc, 1, GL_FALSE, &MVPMtx[0][0]));//model to projection
 
-	//Draw shape-2|arrow-1
+	//Draw shape-4|cube/light source
 	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh4NumIndcs, GL_UNSIGNED_SHORT,
 		(const void*)m_Sh4IndxOff));
 

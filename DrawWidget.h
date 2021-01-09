@@ -38,20 +38,16 @@ private:
 	std::string readShader(const char*);
 	void drawIncTriangle();
 private:
-	Camera* m_pCamera;
+	Camera* m_pCamera;				//camera object
+	/* OpenGL buffer IDs */
 	GLuint m_Sh1Vao;
-	GLuint m_Sh1VtxOff;
-	GLuint m_Sh1IndxOff;
 	GLuint m_Sh2Vao;
-	GLuint m_Sh2VtxOff;
-	GLuint m_Sh2IndxOff;
 	GLuint m_Sh3Vao;
-	GLuint m_Sh3VtxOff;
-	GLuint m_Sh3IndxOff;
 	GLuint m_Sh4Vao;
-	GLuint m_Sh4VtxOff;
-	GLuint m_Sh4IndxOff;
+	GLuint m_Sh5Vao;
+	GLuint m_Sh6Vao;
 	GLuint m_VIbo;
+	/* OpenGL shader vars */
 	GLuint m_Program;
 	GLuint m_ProgramPT;
 	GLint m_u_MVPMtxLoc;
@@ -65,8 +61,22 @@ private:
 	std::string m_VertexShaderPTSrc;
 	std::string m_FragmentShaderPTSrc;
 	uint m_NumTri;
+	GLuint m_Sh1VtxOff;
+	GLuint m_Sh1IndxOff;
+	GLuint m_Sh2VtxOff;
+	GLuint m_Sh2IndxOff;
+	GLuint m_Sh3VtxOff;
+	GLuint m_Sh3IndxOff;
+	GLuint m_Sh4VtxOff;
+	GLuint m_Sh4IndxOff;
+	GLuint m_Sh5VtxOff;
+	GLuint m_Sh5IndxOff;
+	GLuint m_Sh6VtxOff;
+	GLuint m_Sh6IndxOff;
 	uint m_Sh1NumIndcs;
 	uint m_Sh2NumIndcs;
 	uint m_Sh3NumIndcs;
 	uint m_Sh4NumIndcs;
+	uint m_Sh5NumIndcs;
+	uint m_Sh6NumIndcs;
 };
