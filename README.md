@@ -1,10 +1,10 @@
-# JaimeTutorial
-OpenGL practice
-link to playlist by @Jamieking
-https://www.youtube.com/watch?v=6c1QYZAEP2M&list=PLRwVmtr-pp06qT6ckboaOhnm9FxmzHpbY
->Camera moves around using WASD/RF
->Camera looks around using mouse
->Control light source position & attenuation using slider.
+<h1># JaimeTutorial</h1><br/>
+<b>OpenGL practice</b><br/>
+<p>link to playlist by @Jamieking
+https://www.youtube.com/watch?v=6c1QYZAEP2M&list=PLRwVmtr-pp06qT6ckboaOhnm9FxmzHpbY </p>
+>Camera moves around using WASD/RF<br/>
+>Camera looks around using mouse<br/>
+>Control light source position & attenuation using slider.<br/>
 #Todo
 *Click to select an object
 *Individual object position & scaling
