@@ -15,6 +15,7 @@
 
 #include "ShapeGenerator.h"
 #include "Camera.h"
+#include "lightData.h"
 //const float X_DELTA = 0.1f;
 //const uint NUM_VERTICES_PER_TRI = 3;
 //const uint NUM_FLOATS_PER_VTX = 6;
@@ -47,6 +48,7 @@ bool GLLogCall(const char* function, const char* file, int line)
 DrawWidget::DrawWidget(QWidget* parent)
 : QGLWidget(parent),
 m_pCamera(new Camera),
+m_pLightData(NULL),
 m_Sh1Vao(NULL),
 m_Sh1VtxOff(NULL),
 m_Sh1IndxOff(NULL),
@@ -435,15 +437,15 @@ void DrawWidget::initVertexArrays()
 
 	//attribute-0|position
 	GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh4VtxOff)));//4th element is by default 1.0f
+		(const void*)(/*m_Sh4VtxOff*/m_Sh6VtxOff)));//4th element is by default 1.0f
 
 	//attribute-1|color
 	GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh4VtxOff + 3 * sizeof(float))));
+		(const void*)(/*m_Sh4VtxOff*/m_Sh6VtxOff + 3 * sizeof(float))));
 
 	//attribute-2|normal
 	GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh4VtxOff + 6 * sizeof(float))));
+		(const void*)(/*m_Sh4VtxOff*/m_Sh6VtxOff + 6 * sizeof(float))));
 
 	/* Vertex array object */
 	GLCALL(glBindVertexArray(m_Sh5Vao));
@@ -514,6 +516,11 @@ void DrawWidget::drawIncTriangle()
 	};
 	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, m_NumTri * TRIANGLE_BYTE_SIZE, TRIANGLE_BYTE_SIZE, curTri));
 	m_NumTri++;
+}
+
+void DrawWidget::setLDataPtr(lightData* vlightData)
+{
+	m_pLightData = vlightData;
 }
 
 bool checkShaderBuild(GLuint build,
@@ -707,6 +714,7 @@ void DrawWidget::initializeGL()
 	GLCALL(m_u_lightPosLoc = glGetUniformLocation(m_Program, "u_lightPos"));
 	GLCALL(m_u_eyePosLoc = glGetUniformLocation(m_Program, "u_eyePos"));
 	GLCALL(m_u_MWMtxLoc = glGetUniformLocation(m_Program, "u_MWMtx"));
+	GLCALL(m_u_lAttenuationFacLoc = glGetUniformLocation(m_Program, "u_lAttenuationFac"));
 
 	/* Select shader program */
 	GLCALL(glUseProgram(m_ProgramPT));
@@ -739,7 +747,14 @@ void DrawWidget::paintGL()
 	glm::vec4 ambientLight(0.05f, 0.05f, 0.05f, 1.0f);
 
 	//Light-source
-	glm::vec3 lightPos(0.0f, 2.0f, 0.0f);
+	glm::vec3 lightPos(0.0f, 3.0f, 0.0f);
+	if (m_pLightData)
+		lightPos = m_pLightData->pos;
+
+	//Light attenuation(kC, kL, kQ)
+	glm::vec4 lightAttn(0.0025f, 0.0025f, 0.0025f, 0);
+	if (m_pLightData)
+		lightAttn = m_pLightData->attenuation;
 
 	/* Select shader program */
 	GLCALL(glUseProgram(m_Program));
@@ -749,6 +764,7 @@ void DrawWidget::paintGL()
 	GLCALL(glUniform3fv(m_u_eyePosLoc, 1, &eyePos[0]));
 	GLCALL(glUniform3f(m_u_lightPosLoc,
 		lightPos.r, lightPos.g, lightPos.b));
+	GLCALL(glUniform4fv(m_u_lAttenuationFacLoc, 1, &lightAttn[0]));
 
 	/* Bind VAO */
 	GLCALL(glBindVertexArray(m_Sh1Vao));
@@ -757,7 +773,7 @@ void DrawWidget::paintGL()
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh1Ibo));
 
 	//teapot-1
-	glm::mat4 shModelMtx = glm::translate(glm::vec3(-3.0f, 0.0f, -6.0f)) *
+	glm::mat4 shModelMtx = glm::translate(glm::vec3(-3.0f, 0.0f, -2.0f)) *
 							glm::rotate(glm::radians(-90.0f),
 							glm::vec3(1.0f, 0.0f, 0.0f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
@@ -767,8 +783,8 @@ void DrawWidget::paintGL()
 	GLCALL(glUniformMatrix4fv(m_u_MWMtxLoc, 1, GL_FALSE, &shModelMtx[0][0]));//model to world
 
 	//Draw teapot-1
-	/*GLCALL(glDrawElements(GL_TRIANGLES, m_Sh1NumIndcs,
-						  GL_UNSIGNED_SHORT, (const void*)m_Sh1IndxOff));*/
+	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh1NumIndcs,
+						  GL_UNSIGNED_SHORT, (const void*)m_Sh1IndxOff));
 
 	/* Bind VAO */
 	GLCALL(glBindVertexArray(m_Sh2Vao));
@@ -777,9 +793,7 @@ void DrawWidget::paintGL()
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
 
 	//Shape-2|arrow-1
-	shModelMtx = glm::translate(glm::vec3(0.0f, 2.0f, -8.0f)) *
-		glm::rotate(glm::radians(-90.0f),
-			glm::vec3(1.0f, 0.0f, 0.0f));//model to world
+	shModelMtx = glm::translate(glm::vec3(3.0f, 0.0f, 0.0f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
@@ -787,8 +801,8 @@ void DrawWidget::paintGL()
 	GLCALL(glUniformMatrix4fv(m_u_MWMtxLoc, 1, GL_FALSE, &shModelMtx[0][0]));//model to world
 
 	//Draw shape-2|arrow-1
-	/*GLCALL(glDrawElements(GL_TRIANGLES, m_Sh2NumIndcs, GL_UNSIGNED_SHORT,
-		(const void*)m_Sh2IndxOff));*/
+	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh2NumIndcs, GL_UNSIGNED_SHORT,
+		(const void*)m_Sh2IndxOff));
 
 	/* Bind VAO */
 	GLCALL(glBindVertexArray(m_Sh3Vao));
@@ -804,7 +818,7 @@ void DrawWidget::paintGL()
 	GLCALL(glUniformMatrix4fv(m_u_MVPMtxLoc, 1, GL_FALSE, &MVPMtx[0][0]));//model to projection
 	GLCALL(glUniformMatrix4fv(m_u_MWMtxLoc, 1, GL_FALSE, &shModelMtx[0][0]));//model to world
 
-	//Draw shape-3
+	//Draw shape-3|plane
 	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh3NumIndcs, GL_UNSIGNED_SHORT,
 		(const void*)m_Sh3IndxOff));
 	
@@ -815,14 +829,14 @@ void DrawWidget::paintGL()
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
 
 	//Shape-5|torus
-	shModelMtx = glm::mat4(1.0f);//model to world
+	shModelMtx = glm::translate(glm::vec3(0.0f, 0.15f, 0.0f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
 	GLCALL(glUniformMatrix4fv(m_u_MVPMtxLoc, 1, GL_FALSE, &MVPMtx[0][0]));//model to projection
 	GLCALL(glUniformMatrix4fv(m_u_MWMtxLoc, 1, GL_FALSE, &shModelMtx[0][0]));//model to world
 
-	//Draw shape-5
+	//Draw shape-5|torus
 	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh5NumIndcs, GL_UNSIGNED_SHORT,
 		(const void*)m_Sh5IndxOff));
 
@@ -833,14 +847,14 @@ void DrawWidget::paintGL()
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
 
 	//Shape-6|sphere
-	shModelMtx = glm::translate(glm::vec3(3.0f, 3.0f, 3.0f));//model to world
+	shModelMtx = glm::translate(glm::vec3(2.0f, 2.0f, 2.0f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
 	GLCALL(glUniformMatrix4fv(m_u_MVPMtxLoc, 1, GL_FALSE, &MVPMtx[0][0]));//model to projection
 	GLCALL(glUniformMatrix4fv(m_u_MWMtxLoc, 1, GL_FALSE, &shModelMtx[0][0]));//model to world
 
-	//Draw shape-6
+	//Draw shape-6|sphere
 	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh6NumIndcs, GL_UNSIGNED_SHORT,
 		(const void*)m_Sh6IndxOff));
 
@@ -853,16 +867,16 @@ void DrawWidget::paintGL()
 	/* Bind IBO */
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
 
-	//Shape-4|cube
-	shModelMtx = glm::translate(lightPos) * glm::scale(glm::vec3(0.1f, 0.1f, 0.1f));//model to world
+	//Shape-4|cube/sphere|light source
+	shModelMtx = glm::translate(lightPos) * glm::scale(glm::vec3(0.25f, 0.25f, 0.25f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
 	GLCALL(glUniformMatrix4fv(m_u_MVPMtxPTLoc, 1, GL_FALSE, &MVPMtx[0][0]));//model to projection
 
-	//Draw shape-4|cube/light source
-	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh4NumIndcs, GL_UNSIGNED_SHORT,
-		(const void*)m_Sh4IndxOff));
+	//Draw shape-4|cube/sphere|light source
+	GLCALL(glDrawElements(GL_TRIANGLES, /*m_Sh4NumIndcs*/m_Sh6NumIndcs, GL_UNSIGNED_SHORT,
+		(const void*)/*m_Sh4IndxOff*/m_Sh6IndxOff));
 
 	GLCALL(glDisable(GL_DEPTH_TEST));
 }

@@ -2,6 +2,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_JaimeTutorial.h"
+#include "lightData.h"
 
 class JaimeTutorial : public QMainWindow
 {
@@ -12,4 +13,10 @@ public:
 
 private:
     Ui::JaimeTutorialClass ui;
+    lightData m_LightData;
+
+private slots:
+    void xyzSliderChanged();
+    void attnSliderChanged();
+    void colorSliderChanged();
 };

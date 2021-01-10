@@ -5,6 +5,7 @@
 //forward declaration
 class QWidget;
 class Camera;
+class lightData;
 
 #define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCALL(x) GLClearError();\
@@ -37,8 +38,11 @@ private:
 	bool validateProgram(GLuint);
 	std::string readShader(const char*);
 	void drawIncTriangle();
+public:
+	void setLDataPtr(lightData* vlightData);
 private:
 	Camera* m_pCamera;				//camera object
+	lightData* m_pLightData;		//light data ptr
 	/* OpenGL buffer IDs */
 	GLuint m_Sh1Vao;
 	GLuint m_Sh2Vao;
@@ -56,6 +60,7 @@ private:
 	GLint m_u_eyePosLoc;
 	GLint m_u_MWMtxLoc;
 	GLint m_u_MVPMtxPTLoc;
+	GLint m_u_lAttenuationFacLoc;
 	std::string m_VertexShaderSrc;
 	std::string m_FragmentShaderSrc;
 	std::string m_VertexShaderPTSrc;
