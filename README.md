@@ -11,5 +11,7 @@ https://www.youtube.com/watch?v=6c1QYZAEP2M&list=PLRwVmtr-pp06qT6ckboaOhnm9FxmzH
 *Support to choose object intances to be placed on screen<br/>
 *Use IMGUI to change settings and so on..<br/>
 <i>Intent is only to learn basic OpenGL functionality and build on</i><br/>
+
 <b>Current GUI</b><br/>
+
 ![Alt text](GraphicsPad.PNG?raw=true "GUI")
