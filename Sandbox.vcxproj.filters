@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <QtRcc Include="Sandbox.qrc" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="Sandbox.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{6d93cbd6-93b6-4db7-aa2b-b466b6c402f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Include">
+      <UniqueIdentifier>{2f94527b-ac4d-47e6-a745-aa368e04179e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{b62f206d-fb4b-4480-a59f-004095ee8ebd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Camera.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\lightData.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ShapeData.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ShapeGenerator.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\TeapotData.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Vertex.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Shader.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\common.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Renderer.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="include\DrawWidget.h">
+      <Filter>Include</Filter>
+    </QtMoc>
+    <QtMoc Include="include\SandboxMainWindow.h">
+      <Filter>Include</Filter>
+    </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\Camera.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DrawWidget.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\main.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\SandboxMainWindow.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\ShapeGenerator.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Shader.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\common.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Renderer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\FragmentShader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\FragmentShaderPT.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\VertexShader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\VertexShaderPT.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
