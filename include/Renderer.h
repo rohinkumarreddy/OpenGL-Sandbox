@@ -1,6 +1,7 @@
 #pragma once
 
 //forward declaration
+class Mesh;
 class Shader;
 class lightData;
 class Camera;
@@ -25,6 +26,15 @@ private:
 	Shader* m_pShader;				//main shader
 	Shader* m_pShaderPT;			//pass-through shader
 	lightData* m_pLightData;		//light data ptr
+#ifdef USE_MESH
+	/* Mesh objects */
+	Mesh* m_pMesh1;
+	Mesh* m_pMesh2;
+	Mesh* m_pMesh3;
+	Mesh* m_pMesh4;
+	Mesh* m_pMesh5;
+	Mesh* m_pMesh6;
+#else
 	/* OpenGL buffer IDs */
 	GLuint m_Sh1Vao;
 	GLuint m_Sh2Vao;
@@ -53,6 +63,7 @@ private:
 	unsigned int m_Sh4NumIndcs;
 	unsigned int m_Sh5NumIndcs;
 	unsigned int m_Sh6NumIndcs;
+#endif
 	/* Camera */
 	Camera* m_pCamera;
 	/* Frame timing */

@@ -5,23 +5,25 @@
 #include "glm/gtx/transform.hpp"
 
 #include "Renderer.h"
+#include "Mesh.h"
 #include "Shader.h"
 #include "Camera.h"
 #include "ShapeGenerator.h"
 #include "lightData.h"
-
-#define X_DELTA 0.1f
-#define MAX_TRIS 20
-const unsigned int NUM_VERTICES_PER_TRI = 3;
-const unsigned int NUM_FLOATS_PER_VTX = 9;
-const unsigned int VERTEX_BYTE_SIZE = NUM_FLOATS_PER_VTX * sizeof(float);
-const unsigned int TRIANGLE_BYTE_SIZE = NUM_VERTICES_PER_TRI * NUM_FLOATS_PER_VTX * sizeof(float);
 
 Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	:
 	m_pShader(nullptr),
 	m_pShaderPT(nullptr),
 	m_pLightData(nullptr),
+#ifdef USE_MESH
+	m_pMesh1(new Mesh),
+	m_pMesh2(new Mesh),
+	m_pMesh3(new Mesh),
+	m_pMesh4(new Mesh),
+	m_pMesh5(new Mesh),
+	m_pMesh6(new Mesh),
+#else
 	m_Sh1Vao(NULL),
 	m_Sh1VtxOff(NULL),
 	m_Sh1IndxOff(NULL),
@@ -41,13 +43,14 @@ Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	m_Sh6VtxOff(NULL),
 	m_Sh6IndxOff(NULL),
 	m_VIbo(NULL),
-	m_NumTri(1),
 	m_Sh1NumIndcs(NULL),
 	m_Sh2NumIndcs(NULL),
 	m_Sh3NumIndcs(NULL),
 	m_Sh4NumIndcs(NULL),
 	m_Sh5NumIndcs(NULL),
 	m_Sh6NumIndcs(NULL),
+	m_NumTri(1),
+#endif
 	m_curTime(clock()),
 	m_prevTime(NULL),
 	m_timeDelta(NULL),
@@ -62,6 +65,28 @@ Renderer::~Renderer()
 {
 	/* GLCALL results in error here */
 
+#ifdef USE_MESH
+	//Clean-up Meshes
+	if (m_pMesh1 != nullptr)
+		delete m_pMesh1;
+	m_pMesh1 = nullptr;
+	if (m_pMesh2 != nullptr)
+		delete m_pMesh2;
+	m_pMesh2 = nullptr;
+	if (m_pMesh3 != nullptr)
+		delete m_pMesh3;
+	m_pMesh3 = nullptr;
+	if (m_pMesh4 != nullptr)
+		delete m_pMesh4;
+	m_pMesh4 = nullptr;
+	if (m_pMesh5 != nullptr)
+		delete m_pMesh5;
+	m_pMesh5 = nullptr;
+	if (m_pMesh6 != nullptr)
+		delete m_pMesh6;
+	m_pMesh6 = nullptr;
+
+#else
 	//Clean-up vertex & index buffers
 	if (m_VIbo)
 		glDeleteBuffers(1, &m_VIbo);
@@ -79,6 +104,8 @@ Renderer::~Renderer()
 		glDeleteVertexArrays(1, &m_Sh5Vao);
 	if (m_Sh6Vao)
 		glDeleteVertexArrays(1, &m_Sh6Vao);
+
+#endif
 
 	//Disable active shaders
 	Shader::deactivate();
@@ -154,6 +181,8 @@ void Renderer::installShader()
 
 void Renderer::initVertexArrays()
 {
+#ifdef USE_MESH
+#else
 	/* Generate vertex array objects */
 	GLCALL(glGenVertexArrays(1, &m_Sh1Vao));
 	GLCALL(glGenVertexArrays(1, &m_Sh2Vao));
@@ -311,6 +340,7 @@ void Renderer::initVertexArrays()
 	//attribute-2|normal
 	GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
 		(const void*)(m_Sh6VtxOff + 6 * sizeof(float))));
+#endif
 }
 
 void Renderer::initOpenGLData()
@@ -323,6 +353,16 @@ void Renderer::initOpenGLData()
 	ShapeData torus = ShapeGenerator::makeTorus(50);
 	ShapeData sphere = ShapeGenerator::makeSphere(50);
 
+#ifdef USE_MESH
+	/* Create Meshes */
+	m_pMesh1->createMesh(teapot.vertices, teapot.indices, teapot.numVertices, teapot.numIndices);
+	m_pMesh2->createMesh(arrow.vertices, arrow.indices, arrow.numVertices, arrow.numIndices);
+	m_pMesh3->createMesh(plane.vertices, plane.indices, plane.numVertices, plane.numIndices);
+	m_pMesh4->createMesh(cube.vertices, cube.indices, cube.numVertices, cube.numIndices);
+	m_pMesh5->createMesh(torus.vertices, torus.indices, torus.numVertices, torus.numIndices);
+	m_pMesh6->createMesh(sphere.vertices, sphere.indices, sphere.numVertices, sphere.numIndices);
+
+#else
 	/* Vertex buffer object */
 	GLCALL(glGenBuffers(1, &m_VIbo));
 	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VIbo));
@@ -433,6 +473,8 @@ void Renderer::initOpenGLData()
 	m_Sh5NumIndcs = torus.numIndices;
 	m_Sh6NumIndcs = sphere.numIndices;
 
+#endif
+
 	/* Clean up */
 	teapot.cleanUp();
 	arrow.cleanUp();
@@ -505,12 +547,6 @@ void Renderer::draw()
 	m_pShader->setUniform("u_lightPos", lightPos);
 	m_pShader->setUniform("u_lAttenuationFac", lightAttn);
 
-	/* Bind VAO */
-	GLCALL(glBindVertexArray(m_Sh1Vao));
-
-	/* Bind IBO */
-	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh1Ibo));
-
 	//teapot-1
 	glm::mat4 shModelMtx = glm::translate(glm::vec3(-3.0f, 0.0f, -2.0f)) *
 		glm::rotate(glm::radians(-90.0f),
@@ -521,15 +557,19 @@ void Renderer::draw()
 	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
+#ifdef USE_MESH
+	m_pMesh1->renderMesh();
+#else
+	/* Bind VAO */
+	GLCALL(glBindVertexArray(m_Sh1Vao));
+
+	/* Bind IBO */
+	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh1Ibo));
+
 	//Draw teapot-1
 	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh1NumIndcs,
 		GL_UNSIGNED_SHORT, (const void*)m_Sh1IndxOff));
-
-	/* Bind VAO */
-	GLCALL(glBindVertexArray(m_Sh2Vao));
-
-	/* Bind IBO */
-	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
+#endif
 
 	//Shape-2|arrow-1
 	shModelMtx = glm::translate(glm::vec3(3.0f, 0.0f, 0.0f));//model to world
@@ -539,15 +579,19 @@ void Renderer::draw()
 	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
-	//Draw shape-2|arrow-1
-	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh2NumIndcs, GL_UNSIGNED_SHORT,
-		(const void*)m_Sh2IndxOff));
-
+#ifdef USE_MESH
+	m_pMesh2->renderMesh();
+#else
 	/* Bind VAO */
-	GLCALL(glBindVertexArray(m_Sh3Vao));
+	GLCALL(glBindVertexArray(m_Sh2Vao));
 
 	/* Bind IBO */
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
+
+	//Draw shape-2|arrow-1
+	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh2NumIndcs, GL_UNSIGNED_SHORT,
+		(const void*)m_Sh2IndxOff));
+#endif
 
 	//Shape-3|plane
 	shModelMtx = glm::mat4(1.0f);//model to world
@@ -557,15 +601,19 @@ void Renderer::draw()
 	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
-	//Draw shape-3|plane
-	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh3NumIndcs, GL_UNSIGNED_SHORT,
-		(const void*)m_Sh3IndxOff));
-
+#ifdef USE_MESH
+	m_pMesh3->renderMesh();
+#else
 	/* Bind VAO */
-	GLCALL(glBindVertexArray(m_Sh5Vao));
+	GLCALL(glBindVertexArray(m_Sh3Vao));
 
 	/* Bind IBO */
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
+
+	//Draw shape-3|plane
+	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh3NumIndcs, GL_UNSIGNED_SHORT,
+		(const void*)m_Sh3IndxOff));
+#endif
 
 	//Shape-5|torus
 	shModelMtx = glm::translate(glm::vec3(0.0f, 0.15f, 0.0f));//model to world
@@ -575,15 +623,19 @@ void Renderer::draw()
 	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
-	//Draw shape-5|torus
-	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh5NumIndcs, GL_UNSIGNED_SHORT,
-		(const void*)m_Sh5IndxOff));
-
+#ifdef USE_MESH
+	m_pMesh5->renderMesh();
+#else
 	/* Bind VAO */
-	GLCALL(glBindVertexArray(m_Sh6Vao));
+	GLCALL(glBindVertexArray(m_Sh5Vao));
 
 	/* Bind IBO */
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
+
+	//Draw shape-5|torus
+	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh5NumIndcs, GL_UNSIGNED_SHORT,
+		(const void*)m_Sh5IndxOff));
+#endif
 
 	//Shape-6|sphere
 	shModelMtx = glm::translate(glm::vec3(2.0f, 2.0f, 2.0f));//model to world
@@ -593,29 +645,43 @@ void Renderer::draw()
 	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
-	//Draw shape-6|sphere
-	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh6NumIndcs, GL_UNSIGNED_SHORT,
-		(const void*)m_Sh6IndxOff));
-
-	/* Select shader program */
-	m_pShaderPT->activate();
-
+#ifdef USE_MESH
+	m_pMesh6->renderMesh();
+#else
 	/* Bind VAO */
-	GLCALL(glBindVertexArray(m_Sh4Vao));
+	GLCALL(glBindVertexArray(m_Sh6Vao));
 
 	/* Bind IBO */
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
 
-	//Shape-4|cube/sphere|light source
+	//Draw shape-6|sphere
+	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh6NumIndcs, GL_UNSIGNED_SHORT,
+		(const void*)m_Sh6IndxOff));
+#endif
+
+	/* Select shader program */
+	m_pShaderPT->activate();
+
+	//Shape-4|sphere|light source
 	shModelMtx = glm::translate(lightPos) * glm::scale(glm::vec3(0.25f, 0.25f, 0.25f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
 	m_pShaderPT->setUniform("u_MVPMtx", MVPMtx);//model to projection
 
+#ifdef USE_MESH
+	m_pMesh6->renderMesh();
+#else
+	/* Bind VAO */
+	GLCALL(glBindVertexArray(m_Sh4Vao));
+
+	/* Bind IBO */
+	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
+
 	//Draw shape-4|cube/sphere|light source
 	GLCALL(glDrawElements(GL_TRIANGLES, /*m_Sh4NumIndcs*/m_Sh6NumIndcs, GL_UNSIGNED_SHORT,
 		(const void*)/*m_Sh4IndxOff*/m_Sh6IndxOff));
+#endif
 
 	GLCALL(glDisable(GL_DEPTH_TEST));
 }

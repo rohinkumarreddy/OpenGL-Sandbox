@@ -45,6 +45,9 @@
     <ClInclude Include="include\Renderer.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Mesh.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="include\DrawWidget.h">
@@ -77,6 +80,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="source\Renderer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Mesh.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

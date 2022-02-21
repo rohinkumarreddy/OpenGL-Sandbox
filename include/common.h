@@ -13,3 +13,11 @@ bool GLLogCall(const char* function, const char* file, int line);
 #define GLCALL(x) GLClearError();\
         x;\
         ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+#define X_DELTA 0.1f
+#define MAX_TRIS 20
+
+const unsigned int NUM_VERTICES_PER_TRI = 3;
+const unsigned int NUM_FLOATS_PER_VTX = 9;
+const unsigned int VERTEX_BYTE_SIZE = NUM_FLOATS_PER_VTX * sizeof(float);
+const unsigned int TRIANGLE_BYTE_SIZE = NUM_VERTICES_PER_TRI * NUM_FLOATS_PER_VTX * sizeof(float);
