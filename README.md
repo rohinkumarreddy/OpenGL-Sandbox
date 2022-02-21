@@ -1,4 +1,4 @@
-<h1># JaimeTutorial</h1><br/>
+<h1># OpenGL-Sandbox</h1><br/>
 <b>OpenGL practice</b><br/>
 <p>link to playlist by @Jamieking
 https://www.youtube.com/watch?v=6c1QYZAEP2M&list=PLRwVmtr-pp06qT6ckboaOhnm9FxmzHpbY </p>
