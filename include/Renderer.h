@@ -26,7 +26,6 @@ private:
 	Shader* m_pShader;				//main shader
 	Shader* m_pShaderPT;			//pass-through shader
 	lightData* m_pLightData;		//light data ptr
-#ifdef USE_MESH
 	/* Mesh objects */
 	Mesh* m_pMesh1;
 	Mesh* m_pMesh2;
@@ -34,36 +33,6 @@ private:
 	Mesh* m_pMesh4;
 	Mesh* m_pMesh5;
 	Mesh* m_pMesh6;
-#else
-	/* OpenGL buffer IDs */
-	GLuint m_Sh1Vao;
-	GLuint m_Sh2Vao;
-	GLuint m_Sh3Vao;
-	GLuint m_Sh4Vao;
-	GLuint m_Sh5Vao;
-	GLuint m_Sh6Vao;
-	GLuint m_VIbo;
-	/* OpenGL shader vars */
-	unsigned int m_NumTri;
-	GLuint m_Sh1VtxOff;
-	GLuint m_Sh1IndxOff;
-	GLuint m_Sh2VtxOff;
-	GLuint m_Sh2IndxOff;
-	GLuint m_Sh3VtxOff;
-	GLuint m_Sh3IndxOff;
-	GLuint m_Sh4VtxOff;
-	GLuint m_Sh4IndxOff;
-	GLuint m_Sh5VtxOff;
-	GLuint m_Sh5IndxOff;
-	GLuint m_Sh6VtxOff;
-	GLuint m_Sh6IndxOff;
-	unsigned int m_Sh1NumIndcs;
-	unsigned int m_Sh2NumIndcs;
-	unsigned int m_Sh3NumIndcs;
-	unsigned int m_Sh4NumIndcs;
-	unsigned int m_Sh5NumIndcs;
-	unsigned int m_Sh6NumIndcs;
-#endif
 	/* Camera */
 	Camera* m_pCamera;
 	/* Frame timing */

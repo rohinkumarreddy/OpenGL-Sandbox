@@ -16,41 +16,12 @@ Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	m_pShader(nullptr),
 	m_pShaderPT(nullptr),
 	m_pLightData(nullptr),
-#ifdef USE_MESH
 	m_pMesh1(new Mesh),
 	m_pMesh2(new Mesh),
 	m_pMesh3(new Mesh),
 	m_pMesh4(new Mesh),
 	m_pMesh5(new Mesh),
 	m_pMesh6(new Mesh),
-#else
-	m_Sh1Vao(NULL),
-	m_Sh1VtxOff(NULL),
-	m_Sh1IndxOff(NULL),
-	m_Sh2Vao(NULL),
-	m_Sh2VtxOff(NULL),
-	m_Sh2IndxOff(NULL),
-	m_Sh3Vao(NULL),
-	m_Sh3VtxOff(NULL),
-	m_Sh3IndxOff(NULL),
-	m_Sh4Vao(NULL),
-	m_Sh4VtxOff(NULL),
-	m_Sh4IndxOff(NULL),
-	m_Sh5Vao(NULL),
-	m_Sh5VtxOff(NULL),
-	m_Sh5IndxOff(NULL),
-	m_Sh6Vao(NULL),
-	m_Sh6VtxOff(NULL),
-	m_Sh6IndxOff(NULL),
-	m_VIbo(NULL),
-	m_Sh1NumIndcs(NULL),
-	m_Sh2NumIndcs(NULL),
-	m_Sh3NumIndcs(NULL),
-	m_Sh4NumIndcs(NULL),
-	m_Sh5NumIndcs(NULL),
-	m_Sh6NumIndcs(NULL),
-	m_NumTri(1),
-#endif
 	m_curTime(clock()),
 	m_prevTime(NULL),
 	m_timeDelta(NULL),
@@ -65,7 +36,6 @@ Renderer::~Renderer()
 {
 	/* GLCALL results in error here */
 
-#ifdef USE_MESH
 	//Clean-up Meshes
 	if (m_pMesh1 != nullptr)
 		delete m_pMesh1;
@@ -85,27 +55,6 @@ Renderer::~Renderer()
 	if (m_pMesh6 != nullptr)
 		delete m_pMesh6;
 	m_pMesh6 = nullptr;
-
-#else
-	//Clean-up vertex & index buffers
-	if (m_VIbo)
-		glDeleteBuffers(1, &m_VIbo);
-
-	//Clean-up vertex arrays
-	if (m_Sh1Vao)
-		glDeleteVertexArrays(1, &m_Sh1Vao);
-	if (m_Sh2Vao)
-		glDeleteVertexArrays(1, &m_Sh2Vao);
-	if (m_Sh3Vao)
-		glDeleteVertexArrays(1, &m_Sh3Vao);
-	if (m_Sh4Vao)
-		glDeleteVertexArrays(1, &m_Sh4Vao);
-	if (m_Sh5Vao)
-		glDeleteVertexArrays(1, &m_Sh5Vao);
-	if (m_Sh6Vao)
-		glDeleteVertexArrays(1, &m_Sh6Vao);
-
-#endif
 
 	//Disable active shaders
 	Shader::deactivate();
@@ -181,166 +130,6 @@ void Renderer::installShader()
 
 void Renderer::initVertexArrays()
 {
-#ifdef USE_MESH
-#else
-	/* Generate vertex array objects */
-	GLCALL(glGenVertexArrays(1, &m_Sh1Vao));
-	GLCALL(glGenVertexArrays(1, &m_Sh2Vao));
-	GLCALL(glGenVertexArrays(1, &m_Sh3Vao));
-	GLCALL(glGenVertexArrays(1, &m_Sh4Vao));
-	GLCALL(glGenVertexArrays(1, &m_Sh5Vao));
-	GLCALL(glGenVertexArrays(1, &m_Sh6Vao));
-
-	/* Vertex array object */
-	GLCALL(glBindVertexArray(m_Sh1Vao));
-
-	/* Vertex buffer object */
-	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VIbo));
-
-	/* Index buffer object */
-	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VIbo));
-
-	GLCALL(glEnableVertexAttribArray(0));
-	GLCALL(glEnableVertexAttribArray(1));
-	GLCALL(glEnableVertexAttribArray(2));
-
-	//attribute-0|position
-	GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, 0));
-	//4th element is by default 1.0f
-
-	//attribute-1|color
-	GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(3 * sizeof(float))));
-
-	//attribute-2|normal
-	GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(6 * sizeof(float))));
-
-	/* Vertex array object */
-	GLCALL(glBindVertexArray(m_Sh2Vao));
-
-	/* Vertex buffer object */
-	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VIbo));
-
-	/* Index buffer object */
-	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VIbo));
-
-	GLCALL(glEnableVertexAttribArray(0));
-	GLCALL(glEnableVertexAttribArray(1));
-	GLCALL(glEnableVertexAttribArray(2));
-
-	//attribute-0|position
-	GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh2VtxOff)));//4th element is by default 1.0f
-
-	//attribute-1|color
-	GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh2VtxOff + 3 * sizeof(float))));
-
-	//attribute-2|normal
-	GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh2VtxOff + 6 * sizeof(float))));
-
-	/* Vertex array object */
-	GLCALL(glBindVertexArray(m_Sh3Vao));
-
-	/* Vertex buffer object */
-	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VIbo));
-
-	/* Index buffer object */
-	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VIbo));
-
-	GLCALL(glEnableVertexAttribArray(0));
-	GLCALL(glEnableVertexAttribArray(1));
-	GLCALL(glEnableVertexAttribArray(2));
-
-	//attribute-0|position
-	GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh3VtxOff)));//4th element is by default 1.0f
-
-	//attribute-1|color
-	GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh3VtxOff + 3 * sizeof(float))));
-
-	//attribute-2|normal
-	GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh3VtxOff + 6 * sizeof(float))));
-
-	/* Vertex array object */
-	GLCALL(glBindVertexArray(m_Sh4Vao));
-
-	/* Vertex buffer object */
-	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VIbo));
-
-	/* Index buffer object */
-	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VIbo));
-
-	GLCALL(glEnableVertexAttribArray(0));
-	GLCALL(glEnableVertexAttribArray(1));
-	GLCALL(glEnableVertexAttribArray(2));
-
-	//attribute-0|position
-	GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(/*m_Sh4VtxOff*/m_Sh6VtxOff)));//4th element is by default 1.0f
-
-	//attribute-1|color
-	GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(/*m_Sh4VtxOff*/m_Sh6VtxOff + 3 * sizeof(float))));
-
-	//attribute-2|normal
-	GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(/*m_Sh4VtxOff*/m_Sh6VtxOff + 6 * sizeof(float))));
-
-	/* Vertex array object */
-	GLCALL(glBindVertexArray(m_Sh5Vao));
-
-	/* Vertex buffer object */
-	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VIbo));
-
-	/* Index buffer object */
-	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VIbo));
-
-	GLCALL(glEnableVertexAttribArray(0));
-	GLCALL(glEnableVertexAttribArray(1));
-	GLCALL(glEnableVertexAttribArray(2));
-
-	//attribute-0|position
-	GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh5VtxOff)));//4th element is by default 1.0f
-
-	//attribute-1|color
-	GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh5VtxOff + 3 * sizeof(float))));
-
-	//attribute-2|normal
-	GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh5VtxOff + 6 * sizeof(float))));
-
-	/* Vertex array object */
-	GLCALL(glBindVertexArray(m_Sh6Vao));
-
-	/* Vertex buffer object */
-	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VIbo));
-
-	/* Index buffer object */
-	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_VIbo));
-
-	GLCALL(glEnableVertexAttribArray(0));
-	GLCALL(glEnableVertexAttribArray(1));
-	GLCALL(glEnableVertexAttribArray(2));
-
-	//attribute-0|position
-	GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh6VtxOff)));//4th element is by default 1.0f
-
-	//attribute-1|color
-	GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh6VtxOff + 3 * sizeof(float))));
-
-	//attribute-2|normal
-	GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(m_Sh6VtxOff + 6 * sizeof(float))));
-#endif
 }
 
 void Renderer::initOpenGLData()
@@ -353,7 +142,6 @@ void Renderer::initOpenGLData()
 	ShapeData torus = ShapeGenerator::makeTorus(50);
 	ShapeData sphere = ShapeGenerator::makeSphere(50);
 
-#ifdef USE_MESH
 	/* Create Meshes */
 	m_pMesh1->createMesh(teapot.vertices, teapot.indices, teapot.numVertices, teapot.numIndices);
 	m_pMesh2->createMesh(arrow.vertices, arrow.indices, arrow.numVertices, arrow.numIndices);
@@ -361,119 +149,6 @@ void Renderer::initOpenGLData()
 	m_pMesh4->createMesh(cube.vertices, cube.indices, cube.numVertices, cube.numIndices);
 	m_pMesh5->createMesh(torus.vertices, torus.indices, torus.numVertices, torus.numIndices);
 	m_pMesh6->createMesh(sphere.vertices, sphere.indices, sphere.numVertices, sphere.numIndices);
-
-#else
-	/* Vertex buffer object */
-	GLCALL(glGenBuffers(1, &m_VIbo));
-	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VIbo));
-	GLCALL(glBufferData(GL_ARRAY_BUFFER,
-		teapot.vertexBufferSize() + teapot.indexBufferSize() +
-		arrow.vertexBufferSize() + arrow.indexBufferSize() +
-		plane.vertexBufferSize() + plane.indexBufferSize() +
-		cube.vertexBufferSize() + cube.indexBufferSize() +
-		torus.vertexBufferSize() + torus.indexBufferSize() +
-		sphere.vertexBufferSize() + sphere.indexBufferSize(),
-		0, GL_STATIC_DRAW));
-
-	GLsizeiptr curOffset = 0;
-	m_Sh1VtxOff = curOffset;
-
-	/* Shape 1 data */
-	//Vertex data
-	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
-		teapot.vertexBufferSize(), teapot.vertices));
-	curOffset += teapot.vertexBufferSize();
-
-	m_Sh1IndxOff = curOffset;
-
-	//Index data
-	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
-		teapot.indexBufferSize(), teapot.indices));
-	curOffset += teapot.indexBufferSize();
-
-	m_Sh2VtxOff = curOffset;
-
-	/* Shape 2 data */
-	//Vertex data
-	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
-		arrow.vertexBufferSize(), arrow.vertices));
-	curOffset += arrow.vertexBufferSize();
-
-	m_Sh2IndxOff = curOffset;
-
-	//Index data
-	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
-		arrow.indexBufferSize(), arrow.indices));
-	curOffset += arrow.indexBufferSize();
-
-	m_Sh3VtxOff = curOffset;
-
-	/* Shape 3 data */
-	//Vertex data
-	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
-		plane.vertexBufferSize(), plane.vertices));
-	curOffset += plane.vertexBufferSize();
-
-	m_Sh3IndxOff = curOffset;
-
-	//Index data
-	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
-		plane.indexBufferSize(), plane.indices));
-	curOffset += plane.indexBufferSize();
-
-	m_Sh4VtxOff = curOffset;
-
-	/* Shape 4 data */
-	//Vertex data
-	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
-		cube.vertexBufferSize(), cube.vertices));
-	curOffset += cube.vertexBufferSize();
-
-	m_Sh4IndxOff = curOffset;
-
-	//Index data
-	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
-		cube.indexBufferSize(), cube.indices));
-	curOffset += cube.indexBufferSize();
-
-	m_Sh5VtxOff = curOffset;
-
-	/* Shape 5 data */
-	//Vertex data
-	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
-		torus.vertexBufferSize(), torus.vertices));
-	curOffset += torus.vertexBufferSize();
-
-	m_Sh5IndxOff = curOffset;
-
-	//Index data
-	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
-		torus.indexBufferSize(), torus.indices));
-	curOffset += torus.indexBufferSize();
-
-	m_Sh6VtxOff = curOffset;
-
-	/* Shape 6 data */
-	//Vertex data
-	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
-		sphere.vertexBufferSize(), sphere.vertices));
-	curOffset += sphere.vertexBufferSize();
-
-	m_Sh6IndxOff = curOffset;
-
-	//Index data
-	GLCALL(glBufferSubData(GL_ARRAY_BUFFER, curOffset,
-		sphere.indexBufferSize(), sphere.indices));
-	curOffset += sphere.indexBufferSize();
-
-	m_Sh1NumIndcs = teapot.numIndices;
-	m_Sh2NumIndcs = arrow.numIndices;
-	m_Sh3NumIndcs = plane.numIndices;
-	m_Sh4NumIndcs = cube.numIndices;
-	m_Sh5NumIndcs = torus.numIndices;
-	m_Sh6NumIndcs = sphere.numIndices;
-
-#endif
 
 	/* Clean up */
 	teapot.cleanUp();
@@ -557,19 +232,7 @@ void Renderer::draw()
 	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
-#ifdef USE_MESH
 	m_pMesh1->renderMesh();
-#else
-	/* Bind VAO */
-	GLCALL(glBindVertexArray(m_Sh1Vao));
-
-	/* Bind IBO */
-	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh1Ibo));
-
-	//Draw teapot-1
-	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh1NumIndcs,
-		GL_UNSIGNED_SHORT, (const void*)m_Sh1IndxOff));
-#endif
 
 	//Shape-2|arrow-1
 	shModelMtx = glm::translate(glm::vec3(3.0f, 0.0f, 0.0f));//model to world
@@ -579,19 +242,7 @@ void Renderer::draw()
 	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
-#ifdef USE_MESH
 	m_pMesh2->renderMesh();
-#else
-	/* Bind VAO */
-	GLCALL(glBindVertexArray(m_Sh2Vao));
-
-	/* Bind IBO */
-	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
-
-	//Draw shape-2|arrow-1
-	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh2NumIndcs, GL_UNSIGNED_SHORT,
-		(const void*)m_Sh2IndxOff));
-#endif
 
 	//Shape-3|plane
 	shModelMtx = glm::mat4(1.0f);//model to world
@@ -601,19 +252,7 @@ void Renderer::draw()
 	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
-#ifdef USE_MESH
 	m_pMesh3->renderMesh();
-#else
-	/* Bind VAO */
-	GLCALL(glBindVertexArray(m_Sh3Vao));
-
-	/* Bind IBO */
-	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
-
-	//Draw shape-3|plane
-	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh3NumIndcs, GL_UNSIGNED_SHORT,
-		(const void*)m_Sh3IndxOff));
-#endif
 
 	//Shape-5|torus
 	shModelMtx = glm::translate(glm::vec3(0.0f, 0.15f, 0.0f));//model to world
@@ -623,19 +262,7 @@ void Renderer::draw()
 	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
-#ifdef USE_MESH
 	m_pMesh5->renderMesh();
-#else
-	/* Bind VAO */
-	GLCALL(glBindVertexArray(m_Sh5Vao));
-
-	/* Bind IBO */
-	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
-
-	//Draw shape-5|torus
-	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh5NumIndcs, GL_UNSIGNED_SHORT,
-		(const void*)m_Sh5IndxOff));
-#endif
 
 	//Shape-6|sphere
 	shModelMtx = glm::translate(glm::vec3(2.0f, 2.0f, 2.0f));//model to world
@@ -645,19 +272,7 @@ void Renderer::draw()
 	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
-#ifdef USE_MESH
 	m_pMesh6->renderMesh();
-#else
-	/* Bind VAO */
-	GLCALL(glBindVertexArray(m_Sh6Vao));
-
-	/* Bind IBO */
-	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
-
-	//Draw shape-6|sphere
-	GLCALL(glDrawElements(GL_TRIANGLES, m_Sh6NumIndcs, GL_UNSIGNED_SHORT,
-		(const void*)m_Sh6IndxOff));
-#endif
 
 	/* Select shader program */
 	m_pShaderPT->activate();
@@ -669,19 +284,7 @@ void Renderer::draw()
 	//Set Uniform
 	m_pShaderPT->setUniform("u_MVPMtx", MVPMtx);//model to projection
 
-#ifdef USE_MESH
 	m_pMesh6->renderMesh();
-#else
-	/* Bind VAO */
-	GLCALL(glBindVertexArray(m_Sh4Vao));
-
-	/* Bind IBO */
-	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Sh2Ibo));
-
-	//Draw shape-4|cube/sphere|light source
-	GLCALL(glDrawElements(GL_TRIANGLES, /*m_Sh4NumIndcs*/m_Sh6NumIndcs, GL_UNSIGNED_SHORT,
-		(const void*)/*m_Sh4IndxOff*/m_Sh6IndxOff));
-#endif
 
 	GLCALL(glDisable(GL_DEPTH_TEST));
 }
