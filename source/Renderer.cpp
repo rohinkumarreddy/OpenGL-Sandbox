@@ -89,11 +89,8 @@ void Renderer::initialize()
 	/* 4-byte pixel alignment to generate ARGB texture */
 	GLCALL(glPixelStorei(GL_UNPACK_ALIGNMENT, 4));
 
-	/* Initialize OpenGL data */
-	initOpenGLData();
-
-	/* Initialize vertex arrays */
-	initVertexArrays();
+	/* Setup initial scene */
+	setupScene();
 
 	/* Initialize shaders */
 	installShader();
@@ -128,11 +125,7 @@ void Renderer::installShader()
 		return;
 }
 
-void Renderer::initVertexArrays()
-{
-}
-
-void Renderer::initOpenGLData()
+void Renderer::setupScene()
 {
 	/* Shape Object */
 	ShapeData teapot = ShapeGenerator::makeTeapot();

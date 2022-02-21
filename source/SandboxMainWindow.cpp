@@ -12,6 +12,7 @@ SandboxMainWindow::SandboxMainWindow(QWidget *parent)
     connect(ui.lSliderKL, &QSlider::valueChanged, this, &SandboxMainWindow::attnSliderChanged);
     connect(ui.lSliderKQ, &QSlider::valueChanged, this, &SandboxMainWindow::attnSliderChanged);
     connect(ui.lSlidercutoff, &QSlider::valueChanged, this, &SandboxMainWindow::attnSliderChanged);
+    connect(ui.openGLWidget, &DrawWidget::sigClose, this, &SandboxMainWindow::close);
     //trigger initial slider values
     xyzSliderChanged();
     attnSliderChanged();

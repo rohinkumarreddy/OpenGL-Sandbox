@@ -62,11 +62,11 @@ void Mesh::renderMesh()
 	/* Bind VAO */
 	GLCALL(glBindVertexArray(m_VAO));
 	/* Bind IBO */
-	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO));
+	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO));
 	/* Draw Mesh */
 	GLCALL(glDrawElements(GL_TRIANGLES, m_idxCnt, GL_UNSIGNED_SHORT, 0));
 	/* Unbind IBO */
-	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 	/* Unbind VAO */
 	GLCALL(glBindVertexArray(0));
 }

@@ -32,6 +32,12 @@ glm::vec3 Camera::getPosition() const
 	return m_Position;
 }
 
+void Camera::mouseInit(const glm::vec2& newMousePos)
+{
+	//Save old position
+	m_OldMousePos = newMousePos;
+}
+
 void Camera::mouseUpdate(const glm::vec2& newMousePos)
 {
 	const float MOUSE_MOUSE_SPEED = 0.005f;

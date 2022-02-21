@@ -85,6 +85,19 @@ void DrawWidget::mouseMoveEvent(QMouseEvent* e)
 	//repaint();
 }
 
+void DrawWidget::mousePressEvent(QMouseEvent* e)
+{
+	m_pCamera->mouseInit(glm::vec2(e->x(), e->y()));
+	//repaint();
+}
+
+void DrawWidget::mouseReleaseEvent(QMouseEvent* e)
+{
+	//m_pCamera->mouseUpdate(glm::vec2(e->x(), e->y()));
+	//repaint();
+	Q_UNUSED(e)
+}
+
 void DrawWidget::keyPressEvent(QKeyEvent* e)
 {
 	switch(e->key())
@@ -106,6 +119,9 @@ void DrawWidget::keyPressEvent(QKeyEvent* e)
 		break;
 	case Qt::Key::Key_F:
 		m_pCamera->moveDown();
+		break;
+	case Qt::Key::Key_Escape:
+		emit sigClose();
 		break;
 	}
 	//repaint();

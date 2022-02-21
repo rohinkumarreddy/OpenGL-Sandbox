@@ -21,8 +21,7 @@ public:
 	inline void setLDataPtr(lightData* vlightData) { m_pLightData = vlightData; }
 private:
 	void installShader();
-	void initVertexArrays();
-	void initOpenGLData();
+	void setupScene();
 	Shader* m_pShader;				//main shader
 	Shader* m_pShaderPT;			//pass-through shader
 	lightData* m_pLightData;		//light data ptr

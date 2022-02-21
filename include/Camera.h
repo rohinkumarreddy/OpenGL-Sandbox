@@ -10,6 +10,7 @@ public:
 
 	glm::mat4 getWorldToViewMtx() const;
 	glm::vec3 getPosition() const;
+	void mouseInit(const glm::vec2& newMousePos);
 	void mouseUpdate(const glm::vec2& newMousePos);
 	void moveForward();
 	void moveBackward();
