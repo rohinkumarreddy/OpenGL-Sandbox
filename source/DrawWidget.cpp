@@ -81,13 +81,25 @@ void DrawWidget::timerEvent(QTimerEvent* e)
 
 void DrawWidget::mouseMoveEvent(QMouseEvent* e)
 {
-	m_pCamera->mouseUpdate(glm::vec2(e->x(), e->y()));
+	//current mouse position
+	glm::vec2 prevMousePos(m_prevX, m_prevY);
+	//current mouse position
+	glm::vec2 curMousePos(e->x(), e->y());
+	//Calculate mouse delta
+	glm::vec2 mouseDelta = curMousePos - prevMousePos;
+	//update mouse position
+	m_prevX = e->x();
+	m_prevY = e->y();
+	//update camera
+	m_pCamera->mouseUpdate(mouseDelta);
 	//repaint();
 }
 
 void DrawWidget::mousePressEvent(QMouseEvent* e)
 {
-	m_pCamera->mouseInit(glm::vec2(e->x(), e->y()));
+	//save first mouse position
+	m_prevX = e->x();
+	m_prevY = e->y();
 	//repaint();
 }
 

@@ -36,4 +36,6 @@ private:
 	Camera* m_pCamera;				//view camera
 	Renderer* m_pRenderer;			//renderer object
 	int m_Rtimer;					//render timer
+	float m_prevX;					//prev mouse x
+	float m_prevY;					//prev mouse y
 };
