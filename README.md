@@ -5,6 +5,7 @@ https://www.youtube.com/watch?v=6c1QYZAEP2M&list=PLRwVmtr-pp06qT6ckboaOhnm9FxmzH
 >Camera moves around using WASD/RF<br/>
 >Camera looks around using mouse<br/>
 >Control light source position & attenuation using slider.<br/>
+>Added textures<br/>
 <b>#Todo</b><br/>
 *Click to select an object<br/>
 *Individual object position & scaling<br/>
