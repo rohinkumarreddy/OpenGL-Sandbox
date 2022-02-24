@@ -7,6 +7,7 @@ class ShapeGenerator
 public:
 	static ShapeData makeTriangle();
 	static ShapeData makeCube();
+	static ShapeData makeTexCube();
 	static ShapeData makeArrow();
 	static ShapeData makeTorus(unsigned int tesselation = 20);
 	static ShapeData makeSphere(unsigned int tesselation = 20);

@@ -6,6 +6,7 @@
 
 #include "Renderer.h"
 #include "Mesh.h"
+#include "Texture.h"
 #include "Shader.h"
 #include "Camera.h"
 #include "ShapeGenerator.h"
@@ -14,6 +15,7 @@
 Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	:
 	m_pShader(nullptr),
+	m_pTexShader(nullptr),
 	m_pShaderPT(nullptr),
 	m_pLightData(nullptr),
 	m_pMesh1(new Mesh),
@@ -22,6 +24,8 @@ Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	m_pMesh4(new Mesh),
 	m_pMesh5(new Mesh),
 	m_pMesh6(new Mesh),
+	m_pTexMesh(new Mesh),
+	m_pTex(new Texture("Textures/brick.png")),
 	m_curTime(clock()),
 	m_prevTime(NULL),
 	m_timeDelta(NULL),
@@ -55,14 +59,27 @@ Renderer::~Renderer()
 	if (m_pMesh6 != nullptr)
 		delete m_pMesh6;
 	m_pMesh6 = nullptr;
+	if (m_pTexMesh != nullptr)
+		delete m_pTexMesh;
+	m_pTexMesh = nullptr;
+
+	//Clean-up Textures
+	if (m_pTex != nullptr)
+		delete m_pTex;
+	m_pTex = nullptr;
 
 	//Disable active shaders
 	Shader::deactivate();
 
-	//Clean-up shader programs
+	//Clean-up main shader
 	if (m_pShader != nullptr)
 		delete m_pShader;
 	m_pShader = nullptr;
+
+	//Clean-up texture shader
+	if (m_pTexShader != nullptr)
+		delete m_pTexShader;
+	m_pTexShader = nullptr;
 
 	//Clean-up pass-through shader
 	if (m_pShaderPT != nullptr)
@@ -107,6 +124,17 @@ void Renderer::initialize()
 		"u_lAttenuationFac"});
 
 	/* Select shader */
+	m_pTexShader->activate();
+
+	/* Query uniform */
+	m_pTexShader->initUniforms(std::vector<std::string>{"u_MVPMtx",
+		"u_ambientLight",
+		"u_lightPos",
+		"u_eyePos",
+		"u_MWMtx",
+		"u_lAttenuationFac"});
+
+	/* Select shader */
 	m_pShaderPT->activate();
 
 	/* Query uniform */
@@ -116,8 +144,12 @@ void Renderer::initialize()
 /*Shader code*/
 void Renderer::installShader()
 {
-	m_pShader = new Shader((char*)"shaders/VertexShader.glsl", (char*)"shaders/FragmentShader.glsl");
+	m_pShader = new Shader((char*)"shaders/VertexShaderNoTex.glsl", (char*)"shaders/FragmentShaderNoTex.glsl");
 	if (!m_pShader->build())
+		return;
+
+	m_pTexShader = new Shader((char*)"shaders/VertexShader.glsl", (char*)"shaders/FragmentShader.glsl");
+	if (!m_pTexShader->build())
 		return;
 
 	m_pShaderPT = new Shader((char*)"shaders/VertexShaderPT.glsl", (char*)"shaders/FragmentShaderPT.glsl");
@@ -134,6 +166,7 @@ void Renderer::setupScene()
 	ShapeData cube = ShapeGenerator::makeCube();
 	ShapeData torus = ShapeGenerator::makeTorus(50);
 	ShapeData sphere = ShapeGenerator::makeSphere(50);
+	ShapeData texCube = ShapeGenerator::makeTexCube();
 
 	/* Create Meshes */
 	m_pMesh1->createMesh(teapot.vertices, teapot.indices, teapot.numVertices, teapot.numIndices);
@@ -142,6 +175,10 @@ void Renderer::setupScene()
 	m_pMesh4->createMesh(cube.vertices, cube.indices, cube.numVertices, cube.numIndices);
 	m_pMesh5->createMesh(torus.vertices, torus.indices, torus.numVertices, torus.numIndices);
 	m_pMesh6->createMesh(sphere.vertices, sphere.indices, sphere.numVertices, sphere.numIndices);
+	m_pTexMesh->createMesh(texCube.vertices, texCube.indices, texCube.numVertices, texCube.numIndices, true);
+
+	/* Load Textures */
+	m_pTex->loadTexture();
 
 	/* Clean up */
 	teapot.cleanUp();
@@ -150,6 +187,7 @@ void Renderer::setupScene()
 	cube.cleanUp();
 	torus.cleanUp();
 	sphere.cleanUp();
+	texCube.cleanUp();
 
 	/*
 	* Attribute data can also be sent to shader
@@ -265,7 +303,7 @@ void Renderer::draw()
 	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
-	m_pMesh6->renderMesh();
+	//m_pMesh6->renderMesh();
 
 	/* Select shader program */
 	m_pShaderPT->activate();
@@ -278,6 +316,26 @@ void Renderer::draw()
 	m_pShaderPT->setUniform("u_MVPMtx", MVPMtx);//model to projection
 
 	m_pMesh6->renderMesh();
+
+	/* Select shader program */
+	m_pTexShader->activate();
+
+	/* Select texture */
+	m_pTex->activate();
+
+	//Shape-4|sphere|light source
+	shModelMtx = glm::translate(glm::vec3(2.0f, 2.0f, 2.0f));//model to world
+	MVPMtx = VPMtx * shModelMtx;//model to projection
+
+	//Set Uniform
+	m_pTexShader->setUniform("u_ambientLight", ambientLight);
+	m_pTexShader->setUniform("u_eyePos", eyePos);
+	m_pTexShader->setUniform("u_lightPos", lightPos);
+	m_pTexShader->setUniform("u_lAttenuationFac", lightAttn);
+	m_pTexShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
+	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
+
+	m_pTexMesh->renderMesh();
 
 	GLCALL(glDisable(GL_DEPTH_TEST));
 }

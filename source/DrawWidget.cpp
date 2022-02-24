@@ -23,9 +23,11 @@
 
 
 DrawWidget::DrawWidget(QWidget* parent)
-: QGLWidget(parent),
-  m_pCamera(new Camera),
-  m_pRenderer(nullptr)
+	: QGLWidget(parent),
+	m_pCamera(new Camera),
+	m_pRenderer(nullptr),
+	m_prevX(0),
+	m_prevY(0)
 {
 	std::cout << "QT OpenGL version " << this->format().majorVersion() << "." << this->format().minorVersion() << std::endl;
 	m_pRenderer = new Renderer(width(), height(), devicePixelRatio());

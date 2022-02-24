@@ -18,7 +18,7 @@ Mesh::~Mesh()
 	clearMesh();
 }
 
-void Mesh::createMesh(Vertex* vertices, unsigned short* indices, unsigned int numOfVertices, unsigned int numOfIndices)
+void Mesh::createMesh(Vertex* vertices, unsigned short* indices, unsigned int numOfVertices, unsigned int numOfIndices, bool hasTexture)
 {
 	m_idxCnt = numOfIndices;
 
@@ -40,19 +40,40 @@ void Mesh::createMesh(Vertex* vertices, unsigned short* indices, unsigned int nu
 	GLCALL(glEnableVertexAttribArray(0));
 	GLCALL(glEnableVertexAttribArray(1));
 	GLCALL(glEnableVertexAttribArray(2));
-	
-	//attribute-0|position
-	GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, 0));
-	//4th element is by default 1.0f
-	
-	//attribute-1|color
-	GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(3 * sizeof(float))));
+	if (hasTexture)
+	{
+		GLCALL(glEnableVertexAttribArray(3));
 
-	//attribute-2|normal
-	GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-		(const void*)(6 * sizeof(float))));
+		//attribute-0|position
+		GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, TEX_VERTEX_BYTE_SIZE, 0));
+		//4th element is by default 1.0f
 
+		//attribute-1|color
+		GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, TEX_VERTEX_BYTE_SIZE,
+			(const void*)(3 * sizeof(float))));
+
+		//attribute-2|texture coordinates
+		GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, TEX_VERTEX_BYTE_SIZE,
+			(const void*)(6 * sizeof(float))));
+
+		//attribute-3|normal
+		GLCALL(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, TEX_VERTEX_BYTE_SIZE,
+			(const void*)(9 * sizeof(float))));
+	}
+	else
+	{
+		//attribute-0|position
+		GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, 0));
+		//4th element is by default 1.0f
+
+		//attribute-1|color
+		GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
+			(const void*)(3 * sizeof(float))));
+
+		//attribute-2|normal
+		GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
+			(const void*)(6 * sizeof(float))));
+	}
 	//Unbind Vertex array
 	GLCALL(glBindVertexArray(0));
 }

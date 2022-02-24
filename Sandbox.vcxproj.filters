@@ -48,6 +48,9 @@
     <ClInclude Include="include\Mesh.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Texture.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="include\DrawWidget.h">
@@ -85,6 +88,9 @@
     <ClCompile Include="source\Mesh.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="source\Texture.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\FragmentShader.glsl">
@@ -97,6 +103,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\VertexShaderPT.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\FragmentShaderNoTex.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\VertexShaderNoTex.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

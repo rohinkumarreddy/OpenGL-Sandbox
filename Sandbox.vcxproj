@@ -192,6 +192,7 @@
     <ClInclude Include="include\ShapeData.h" />
     <ClInclude Include="include\ShapeGenerator.h" />
     <ClInclude Include="include\TeapotData.h" />
+    <ClInclude Include="include\Texture.h" />
     <ClInclude Include="include\Vertex.h" />
     <QtMoc Include="include\SandboxMainWindow.h" />
     <QtMoc Include="include\DrawWidget.h" />
@@ -206,11 +207,14 @@
     <ClCompile Include="source\SandboxMainWindow.cpp" />
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\ShapeGenerator.cpp" />
+    <ClCompile Include="source\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\FragmentShader.glsl" />
+    <None Include="shaders\FragmentShaderNoTex.glsl" />
     <None Include="shaders\FragmentShaderPT.glsl" />
     <None Include="shaders\VertexShader.glsl" />
+    <None Include="shaders\VertexShaderNoTex.glsl" />
     <None Include="shaders\VertexShaderPT.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

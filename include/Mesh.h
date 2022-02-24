@@ -11,7 +11,8 @@ public:
 	void createMesh(Vertex* vertices,
 					unsigned short* indices,
 					unsigned int numOfVertices,
-					unsigned int numOfIndices);
+					unsigned int numOfIndices,
+					bool hasTexture = false);
 	void renderMesh();
 	void clearMesh();
 

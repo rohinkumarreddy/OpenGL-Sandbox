@@ -3,7 +3,6 @@
 /* Vars passed from vertex shader */
 in vec3 p_normal;				//vertex normal|no translation only rotation|world space 
 in vec3 p_pos;					//vertex position|world space
-in vec2 p_texCoords;			//texture coordinates
 
 /* Vars passed to next shader */
 out vec4 color;
@@ -13,8 +12,6 @@ uniform vec4 u_ambientLight;	//ambient light|brightness
 uniform vec3 u_lightPos;		//light source postion|world space
 uniform vec3 u_eyePos;			//eye postion|world space
 uniform vec4 u_lAttenuationFac; //light attenuation fators|(kC,kL,kQ,cuttoff)
-
-uniform sampler2D texSample;
 
 /* light attenuation factors */
 //float kc = 0.5;					//constant attenuation factor
@@ -69,9 +66,7 @@ void main()
 //	float lightAttenuation = 1.0/(kc+linearComponent+quadraticComponent);
 	float lightAttenuation = LightAttenuation(lightDist, 0.25);
 
-	color = (u_ambientLight +
-			 lightAttenuation * clamp(diffuseLight, 0, 1)) * texture(texSample, p_texCoords) +
-			 lightAttenuation * specularLight;
+	color = u_ambientLight + lightAttenuation*(clamp(diffuseLight, 0, 1) + specularLight);
 }
 
 /* //Diffusion + ambient light

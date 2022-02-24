@@ -20,4 +20,5 @@ bool GLLogCall(const char* function, const char* file, int line);
 const unsigned int NUM_VERTICES_PER_TRI = 3;
 const unsigned int NUM_FLOATS_PER_VTX = 9;
 const unsigned int VERTEX_BYTE_SIZE = NUM_FLOATS_PER_VTX * sizeof(float);
+const unsigned int TEX_VERTEX_BYTE_SIZE = (NUM_FLOATS_PER_VTX+3) * sizeof(float);//add 3 values per vertex for texture (U,V,0)
 const unsigned int TRIANGLE_BYTE_SIZE = NUM_VERTICES_PER_TRI * NUM_FLOATS_PER_VTX * sizeof(float);

@@ -5,6 +5,7 @@ class Mesh;
 class Shader;
 class lightData;
 class Camera;
+class Texture;
 
 class Renderer
 {
@@ -23,6 +24,7 @@ private:
 	void installShader();
 	void setupScene();
 	Shader* m_pShader;				//main shader
+	Shader* m_pTexShader;			//texture shader
 	Shader* m_pShaderPT;			//pass-through shader
 	lightData* m_pLightData;		//light data ptr
 	/* Mesh objects */
@@ -32,6 +34,9 @@ private:
 	Mesh* m_pMesh4;
 	Mesh* m_pMesh5;
 	Mesh* m_pMesh6;
+	Mesh* m_pTexMesh;
+	/* Texture */
+	Texture* m_pTex;
 	/* Camera */
 	Camera* m_pCamera;
 	/* Frame timing */
