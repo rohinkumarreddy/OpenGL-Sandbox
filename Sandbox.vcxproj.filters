@@ -119,5 +119,6 @@
     <Image Include="Textures\brick.png">
       <Filter>Textures</Filter>
     </Image>
+    <Image Include="GraphicsPad.PNG" />
   </ItemGroup>
 </Project>
