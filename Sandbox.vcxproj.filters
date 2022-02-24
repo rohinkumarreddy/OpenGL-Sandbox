@@ -114,6 +114,7 @@
     <None Include="shaders\VertexShaderNoTex.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Textures\brick.png">
