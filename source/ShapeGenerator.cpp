@@ -627,8 +627,8 @@ ShapeData ShapeGenerator::makeTeapot(unsigned int tesselation, const glm::mat4& 
 		v.position.x = vertices[i * 3 + 0];
 		v.position.y = vertices[i * 3 + 1];
 		v.position.z = vertices[i * 3 + 2];
-		v.texture.x = textureCoordinates[i * 3 + 0];
-		v.texture.y = textureCoordinates[i * 3 + 1];
+		v.texture.x = textureCoordinates[i * 2 + 0];
+		v.texture.y = textureCoordinates[i * 2 + 1];
 		v.texture.z = 0;
 		v.normal.x = normals[i * 3 + 0];
 		v.normal.y = normals[i * 3 + 1];
