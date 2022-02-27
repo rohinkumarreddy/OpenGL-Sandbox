@@ -69,9 +69,10 @@ void main()
 //	float lightAttenuation = 1.0/(kc+linearComponent+quadraticComponent);
 	float lightAttenuation = LightAttenuation(lightDist, 0.25);
 
-	color = (u_ambientLight +
-			 lightAttenuation * clamp(diffuseLight, 0, 1)) * texture(texSample, p_texCoords) +
-			 lightAttenuation * specularLight;
+//	color = (u_ambientLight + lightAttenuation * clamp(diffuseLight, 0, 1)) * texture(texSample, p_texCoords) +
+//			 lightAttenuation * specularLight;
+	color = (u_ambientLight + lightAttenuation * clamp(diffuseLight, 0, 1) +
+	lightAttenuation * specularLight)* texture(texSample, p_texCoords);
 }
 
 /* //Diffusion + ambient light

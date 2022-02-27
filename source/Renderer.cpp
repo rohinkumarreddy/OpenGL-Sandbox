@@ -26,14 +26,14 @@ Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	m_pMesh6(new Mesh),
 	m_pTexMesh(new Mesh),
 	m_pTex(new Texture("Textures/brick.png")),
-	m_curTime(clock()),
-	m_prevTime(NULL),
 	m_timeDelta(NULL),
 	m_width(width),
 	m_height(height),
 	m_PixRatio(pixelRatio),
 	m_pCamera(nullptr)
 {
+	QueryPerformanceFrequency(&m_freq);
+	QueryPerformanceCounter(&m_prevTime);
 }
 
 Renderer::~Renderer()
@@ -166,7 +166,7 @@ void Renderer::setupScene()
 	ShapeData cube = ShapeGenerator::makeCube();
 	ShapeData torus = ShapeGenerator::makeTorus(50);
 	ShapeData sphere = ShapeGenerator::makeSphere(50);
-	ShapeData texCube = ShapeGenerator::makeTexCube();
+	ShapeData texCube = ShapeGenerator::makeCube();
 
 	/* Create Meshes */
 	m_pMesh1->createMesh(teapot.vertices, teapot.indices, teapot.numVertices, teapot.numIndices);
@@ -175,7 +175,7 @@ void Renderer::setupScene()
 	m_pMesh4->createMesh(cube.vertices, cube.indices, cube.numVertices, cube.numIndices);
 	m_pMesh5->createMesh(torus.vertices, torus.indices, torus.numVertices, torus.numIndices);
 	m_pMesh6->createMesh(sphere.vertices, sphere.indices, sphere.numVertices, sphere.numIndices);
-	m_pTexMesh->createMesh(texCube.vertices, texCube.indices, texCube.numVertices, texCube.numIndices, true);
+	m_pTexMesh->createMesh(texCube.vertices, texCube.indices, texCube.numVertices, texCube.numIndices);
 
 	/* Load Textures */
 	m_pTex->loadTexture();
@@ -199,11 +199,12 @@ void Renderer::setupScene()
 
 void Renderer::draw()
 {
+	LARGE_INTEGER curTime;
 	/* update timing */
-	m_curTime = clock();
+	QueryPerformanceCounter(&curTime);
 	//if (m_prevTime > 0)
 	{
-		float timeDelta = (float)(m_curTime - m_prevTime) / (float)CLOCKS_PER_SEC;
+		double timeDelta = (double)(curTime.QuadPart - m_prevTime.QuadPart) / (double)m_freq.QuadPart;
 		if (timeDelta > 1.0f / 30.0f)
 			timeDelta = 1.0f / 30.0f;
 		m_timeDelta = timeDelta;
@@ -211,7 +212,7 @@ void Renderer::draw()
 			m_pCamera->setTimeDelta(timeDelta);
 		//std::cout << "time delta " << timeDelta << std::endl;
 	}
-	m_prevTime = m_curTime;//update previous time
+	QueryPerformanceCounter(&m_prevTime);//update previous time
 
 	GLCALL(glEnable(GL_DEPTH_TEST));
 	GLCALL(glEnable(GL_CULL_FACE));
@@ -244,6 +245,9 @@ void Renderer::draw()
 	if (m_pLightData)
 		lightAttn = m_pLightData->attenuation;
 
+	/* Select texture */
+	m_pTex->activate();
+
 	/* Select shader */
 	m_pShader->activate();
 
@@ -253,20 +257,8 @@ void Renderer::draw()
 	m_pShader->setUniform("u_lightPos", lightPos);
 	m_pShader->setUniform("u_lAttenuationFac", lightAttn);
 
-	//teapot-1
-	glm::mat4 shModelMtx = glm::translate(glm::vec3(-3.0f, 0.0f, -2.0f)) *
-		glm::rotate(glm::radians(-90.0f),
-			glm::vec3(1.0f, 0.0f, 0.0f));//model to world
-	MVPMtx = VPMtx * shModelMtx;//model to projection
-
-	//Set Uniform
-	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
-	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
-
-	m_pMesh1->renderMesh();
-
 	//Shape-2|arrow-1
-	shModelMtx = glm::translate(glm::vec3(3.0f, 0.0f, 0.0f));//model to world
+	glm::mat4 shModelMtx = glm::translate(glm::vec3(3.0f, 0.0f, 0.0f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
@@ -274,36 +266,6 @@ void Renderer::draw()
 	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
 	m_pMesh2->renderMesh();
-
-	//Shape-3|plane
-	shModelMtx = glm::mat4(1.0f);//model to world
-	MVPMtx = VPMtx * shModelMtx;//model to projection
-
-	//Set Uniform
-	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
-	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
-
-	m_pMesh3->renderMesh();
-
-	//Shape-5|torus
-	shModelMtx = glm::translate(glm::vec3(0.0f, 0.15f, 0.0f));//model to world
-	MVPMtx = VPMtx * shModelMtx;//model to projection
-
-	//Set Uniform
-	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
-	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
-
-	m_pMesh5->renderMesh();
-
-	//Shape-6|sphere
-	shModelMtx = glm::translate(glm::vec3(2.0f, 2.0f, 2.0f));//model to world
-	MVPMtx = VPMtx * shModelMtx;//model to projection
-
-	//Set Uniform
-	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
-	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
-
-	//m_pMesh6->renderMesh();
 
 	/* Select shader program */
 	m_pShaderPT->activate();
@@ -320,10 +282,7 @@ void Renderer::draw()
 	/* Select shader program */
 	m_pTexShader->activate();
 
-	/* Select texture */
-	m_pTex->activate();
-
-	//Shape-4|sphere|light source
+	//Shape-5|cube|textured cube
 	shModelMtx = glm::translate(glm::vec3(2.0f, 2.0f, 2.0f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
@@ -336,6 +295,48 @@ void Renderer::draw()
 	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
 	m_pTexMesh->renderMesh();
+
+	//Shape-3|plane
+	shModelMtx = glm::mat4(1.0f);//model to world
+	MVPMtx = VPMtx * shModelMtx;//model to projection
+
+	//Set Uniform
+	m_pTexShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
+	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
+
+	m_pMesh3->renderMesh();
+
+	//Shape-6|sphere
+	shModelMtx = glm::translate(glm::vec3(4.0f, 2.0f, -1.0f));//model to world
+	MVPMtx = VPMtx * shModelMtx;//model to projection
+
+	//Set Uniform
+	m_pTexShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
+	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
+
+	m_pMesh6->renderMesh();
+
+	//Shape-5|torus
+	shModelMtx = glm::translate(glm::vec3(0.0f, 0.15f, 0.0f));//model to world
+	MVPMtx = VPMtx * shModelMtx;//model to projection
+
+	//Set Uniform
+	m_pTexShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
+	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
+
+	m_pMesh5->renderMesh();
+
+	//teapot-1
+	shModelMtx = glm::translate(glm::vec3(-3.0f, 0.0f, -2.0f)) *
+		glm::rotate(glm::radians(-90.0f),
+			glm::vec3(1.0f, 0.0f, 0.0f));//model to world
+	MVPMtx = VPMtx * shModelMtx;//model to projection
+
+	//Set Uniform
+	m_pTexShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
+	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
+
+	m_pMesh1->renderMesh();
 
 	GLCALL(glDisable(GL_DEPTH_TEST));
 }

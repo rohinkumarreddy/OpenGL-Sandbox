@@ -12,7 +12,7 @@ public:
 					unsigned short* indices,
 					unsigned int numOfVertices,
 					unsigned int numOfIndices,
-					bool hasTexture = false);
+					bool hasTexture = true);
 	void renderMesh();
 	void clearMesh();
 
