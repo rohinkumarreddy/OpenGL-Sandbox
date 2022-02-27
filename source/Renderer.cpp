@@ -307,7 +307,7 @@ void Renderer::draw()
 	m_pMesh3->renderMesh();
 
 	//Shape-6|sphere
-	shModelMtx = glm::translate(glm::vec3(4.0f, 2.0f, -1.0f));//model to world
+	shModelMtx = glm::translate(glm::vec3(1.0f, 2.0f, -1.0f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
