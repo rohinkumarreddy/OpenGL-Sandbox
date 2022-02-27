@@ -495,7 +495,7 @@ ShapeData ShapeGenerator::makeSphere(unsigned int tesselation)
 	return ret;
 }
 
-ShapeData ShapeGenerator::makePlaneVerts(unsigned int dimensions)
+ShapeData ShapeGenerator::makePlaneVerts(unsigned int dimensions, unsigned int texRepeat)
 {
 	ShapeData ret;
 	ret.numVertices = dimensions * dimensions;
@@ -509,7 +509,12 @@ ShapeData ShapeGenerator::makePlaneVerts(unsigned int dimensions)
 			thisVert.position.x = j - half;
 			thisVert.position.z = i - half;
 			thisVert.position.y = 0;
-			thisVert.texture = glm::vec3((float)i / (float)(dimensions-1), (float)j / (float)(dimensions - 1), 0.0f);
+			if(texRepeat)
+				thisVert.texture = glm::vec3((float)i / (float)(texRepeat - 1),
+											 (float)j / (float)(texRepeat - 1), 0.0f);
+			else
+				thisVert.texture = glm::vec3((float)i / (float)(dimensions - 1),
+											 (float)j / (float)(dimensions - 1), 0.0f);
 			thisVert.normal = glm::vec3(0.0f, 1.0f, 0.0f);
 			thisVert.color = randomColor();
 		}
@@ -595,9 +600,9 @@ ShapeData ShapeGenerator::makePlaneUnseamedIndices(unsigned int tesselation)
 	return ret;
 }
 
-ShapeData ShapeGenerator::makePlane(unsigned int dimensions)
+ShapeData ShapeGenerator::makePlane(unsigned int dimensions, unsigned int texRepeat)
 {
-	ShapeData ret = makePlaneVerts(dimensions);
+	ShapeData ret = makePlaneVerts(dimensions, texRepeat);
 	ShapeData ret2 = makePlaneIndices(dimensions);
 	ret.numIndices = ret2.numIndices;
 	ret.indices = ret2.indices;

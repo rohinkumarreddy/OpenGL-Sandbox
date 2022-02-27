@@ -38,7 +38,9 @@ private:
 	Mesh* m_pMesh6;
 	Mesh* m_pTexMesh;
 	/* Texture */
-	Texture* m_pTex;
+	Texture* m_pTex1;
+	Texture* m_pTex2;
+	Texture* m_pTex3;
 	/* Camera */
 	Camera* m_pCamera;
 	/* Frame timing */

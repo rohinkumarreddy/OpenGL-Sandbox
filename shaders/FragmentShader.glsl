@@ -72,7 +72,7 @@ void main()
 //	color = (u_ambientLight + lightAttenuation * clamp(diffuseLight, 0, 1)) * texture(texSample, p_texCoords) +
 //			 lightAttenuation * specularLight;
 	color = (u_ambientLight + lightAttenuation * clamp(diffuseLight, 0, 1) +
-	lightAttenuation * specularLight)* texture(texSample, p_texCoords);
+	lightAttenuation * specularLight)* clamp(texture(texSample, p_texCoords), 0, 1);
 }
 
 /* //Diffusion + ambient light

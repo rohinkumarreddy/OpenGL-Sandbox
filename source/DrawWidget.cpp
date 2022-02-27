@@ -138,5 +138,5 @@ void DrawWidget::keyPressEvent(QKeyEvent* e)
 		emit sigClose();
 		break;
 	}
-	//repaint();
+	repaint();
 }

@@ -25,7 +25,9 @@ Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	m_pMesh5(new Mesh),
 	m_pMesh6(new Mesh),
 	m_pTexMesh(new Mesh),
-	m_pTex(new Texture("Textures/brick.png")),
+	m_pTex1(new Texture("Textures/brick.png")),
+	m_pTex2(new Texture("Textures/bricks.png")),
+	m_pTex3(new Texture("Textures/tiles.png")),
 	m_timeDelta(NULL),
 	m_width(width),
 	m_height(height),
@@ -64,9 +66,15 @@ Renderer::~Renderer()
 	m_pTexMesh = nullptr;
 
 	//Clean-up Textures
-	if (m_pTex != nullptr)
-		delete m_pTex;
-	m_pTex = nullptr;
+	if (m_pTex1 != nullptr)
+		delete m_pTex1;
+	m_pTex1 = nullptr;
+	if (m_pTex2 != nullptr)
+		delete m_pTex2;
+	m_pTex2 = nullptr;
+	if (m_pTex3 != nullptr)
+		delete m_pTex3;
+	m_pTex3 = nullptr;
 
 	//Disable active shaders
 	Shader::deactivate();
@@ -162,7 +170,7 @@ void Renderer::setupScene()
 	/* Shape Object */
 	ShapeData teapot = ShapeGenerator::makeTeapot();
 	ShapeData arrow = ShapeGenerator::makeArrow();
-	ShapeData plane = ShapeGenerator::makePlane(20);
+	ShapeData plane = ShapeGenerator::makePlane(100,2);
 	ShapeData cube = ShapeGenerator::makeCube();
 	ShapeData torus = ShapeGenerator::makeTorus(50);
 	ShapeData sphere = ShapeGenerator::makeSphere(50);
@@ -178,7 +186,9 @@ void Renderer::setupScene()
 	m_pTexMesh->createMesh(texCube.vertices, texCube.indices, texCube.numVertices, texCube.numIndices);
 
 	/* Load Textures */
-	m_pTex->loadTexture();
+	m_pTex1->loadTexture();
+	m_pTex2->loadTexture();
+	m_pTex3->loadTexture();
 
 	/* Clean up */
 	teapot.cleanUp();
@@ -227,7 +237,7 @@ void Renderer::draw()
 	//Done only to learn | not optimal memory wise
 	glm::mat4 MVPMtx = glm::mat4(1.0f);
 	glm::mat4 projMtx = glm::perspective(glm::radians(60.0f),
-		((float)m_width) / m_height, 0.1f, 20.0f);//view to projection
+		((float)m_width) / m_height, 0.1f, 100.0f);//view to projection
 	glm::mat4 viewMtx = m_pCamera->getWorldToViewMtx();//world to view
 	glm::mat4 VPMtx = projMtx * viewMtx;//world to projection
 	glm::vec3 eyePos = m_pCamera->getPosition();//eye position|world space
@@ -246,26 +256,27 @@ void Renderer::draw()
 		lightAttn = m_pLightData->attenuation;
 
 	/* Select texture */
-	m_pTex->activate();
+	m_pTex1->activate();
 
-	/* Select shader */
-	m_pShader->activate();
+	///* Select shader */
+	//m_pShader->activate();
 
-	//Set Uniform
-	m_pShader->setUniform("u_ambientLight", ambientLight);
-	m_pShader->setUniform("u_eyePos", eyePos);
-	m_pShader->setUniform("u_lightPos", lightPos);
-	m_pShader->setUniform("u_lAttenuationFac", lightAttn);
+	////Set Uniform
+	//m_pShader->setUniform("u_ambientLight", ambientLight);
+	//m_pShader->setUniform("u_eyePos", eyePos);
+	//m_pShader->setUniform("u_lightPos", lightPos);
+	//m_pShader->setUniform("u_lAttenuationFac", lightAttn);
 
 	//Shape-2|arrow-1
-	glm::mat4 shModelMtx = glm::translate(glm::vec3(3.0f, 0.0f, 0.0f));//model to world
-	MVPMtx = VPMtx * shModelMtx;//model to projection
+	glm::mat4 shModelMtx = glm::translate(glm::vec3(1.0f, 0.0f, 0.25f)) *
+										  glm::scale(glm::vec3(0.25f, 0.25f, 0.25f));//model to world
+	//MVPMtx = VPMtx * shModelMtx;//model to projection
 
-	//Set Uniform
-	m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
-	m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
+	////Set Uniform
+	//m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
+	//m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
-	m_pMesh2->renderMesh();
+	//m_pMesh2->renderMesh();
 
 	/* Select shader program */
 	m_pShaderPT->activate();
@@ -282,8 +293,9 @@ void Renderer::draw()
 	/* Select shader program */
 	m_pTexShader->activate();
 
-	//Shape-5|cube|textured cube
-	shModelMtx = glm::translate(glm::vec3(2.0f, 2.0f, 2.0f));//model to world
+	//Shape-5|cube
+	shModelMtx = glm::translate(glm::vec3(0.5f, 0.25f, 1.0f)) *
+								glm::scale(glm::vec3(0.25f, 0.25f, 0.25f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
@@ -296,6 +308,30 @@ void Renderer::draw()
 
 	m_pTexMesh->renderMesh();
 
+	//Shape-6|sphere
+	shModelMtx = glm::translate(glm::vec3(1.0f, 0.25f, -0.5f)) *
+								glm::scale(glm::vec3(0.25f, 0.25f, 0.25f));//model to world
+	MVPMtx = VPMtx * shModelMtx;//model to projection
+
+	//Set Uniform
+	m_pTexShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
+	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
+
+	m_pMesh6->renderMesh();
+
+	//Shape-5|torus
+	shModelMtx = glm::translate(glm::vec3(0.0f, 0.15f, 0.0f)) *
+								glm::scale(glm::vec3(0.25f, 0.25f, 0.25f));//model to world
+	MVPMtx = VPMtx * shModelMtx;//model to projection
+
+	//Set Uniform
+	m_pTexShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
+	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
+
+	m_pMesh5->renderMesh();
+
+	/* Select texture */
+	m_pTex2->activate();
 	//Shape-3|plane
 	shModelMtx = glm::mat4(1.0f);//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
@@ -306,29 +342,12 @@ void Renderer::draw()
 
 	m_pMesh3->renderMesh();
 
-	//Shape-6|sphere
-	shModelMtx = glm::translate(glm::vec3(1.0f, 2.0f, -1.0f));//model to world
-	MVPMtx = VPMtx * shModelMtx;//model to projection
-
-	//Set Uniform
-	m_pTexShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
-	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
-
-	m_pMesh6->renderMesh();
-
-	//Shape-5|torus
-	shModelMtx = glm::translate(glm::vec3(0.0f, 0.15f, 0.0f));//model to world
-	MVPMtx = VPMtx * shModelMtx;//model to projection
-
-	//Set Uniform
-	m_pTexShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
-	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
-
-	m_pMesh5->renderMesh();
-
+	/* Select texture */
+	m_pTex3->activate();
 	//teapot-1
-	shModelMtx = glm::translate(glm::vec3(-3.0f, 0.0f, -2.0f)) *
-		glm::rotate(glm::radians(-90.0f),
+	shModelMtx = glm::translate(glm::vec3(-0.5f, 0.0f, -1.0f)) *
+								glm::scale(glm::vec3(0.25f, 0.25f, 0.25f)) *
+								glm::rotate(glm::radians(-90.0f),
 			glm::vec3(1.0f, 0.0f, 0.0f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
