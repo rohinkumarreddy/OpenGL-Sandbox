@@ -243,7 +243,7 @@ void Renderer::draw()
 	glm::vec3 eyePos = m_pCamera->getPosition();//eye position|world space
 
 	//Ambient-light
-	glm::vec4 ambientLight(0.05f, 0.05f, 0.05f, 1.0f);
+	glm::vec4 ambientLight(0.1f, 0.1f, 0.1f, 1.0f);
 
 	//Light-source
 	glm::vec3 lightPos(0.0f, 3.0f, 0.0f);
@@ -282,7 +282,7 @@ void Renderer::draw()
 	m_pShaderPT->activate();
 
 	//Shape-4|sphere|light source
-	shModelMtx = glm::translate(lightPos) * glm::scale(glm::vec3(0.25f, 0.25f, 0.25f));//model to world
+	shModelMtx = glm::translate(lightPos) * glm::scale(glm::vec3(0.0625f, 0.0625f, 0.0625f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
