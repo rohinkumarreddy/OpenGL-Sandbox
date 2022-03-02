@@ -27,11 +27,20 @@ DrawWidget::DrawWidget(QWidget* parent)
 	m_pCamera(new Camera),
 	m_pRenderer(nullptr),
 	m_prevX(0),
-	m_prevY(0)
+	m_prevY(0),
+	m_timeDelta(0),
+	m_leftBtnPressed(false),
+	m_rightBtnPressed(false),
+	m_middleBtnPressed(false)
 {
+#ifndef NDEBUG
 	std::cout << "QT OpenGL version " << this->format().majorVersion() << "." << this->format().minorVersion() << std::endl;
+#endif
 	m_pRenderer = new Renderer(width(), height(), devicePixelRatio());
-	m_Rtimer = startTimer(0);
+	m_Rtimer = startTimer(0, Qt::TimerType::PreciseTimer);
+	QueryPerformanceFrequency(&m_freq);
+	QueryPerformanceCounter(&m_prevTime);
+	//std::cout<<"double buffer "<<(doubleBuffer() ? "true\n" : "false\n");
 }
 
 DrawWidget::~DrawWidget()
@@ -61,7 +70,9 @@ void DrawWidget::initializeGL()
 
 void DrawWidget::paintGL()
 {
+	//std::cout << "chk2\n";
 	m_pRenderer->draw();
+	//std::cout << "chk5\n";
 }
 
 void DrawWidget::resizeEvent(QResizeEvent* e)
@@ -77,7 +88,27 @@ void DrawWidget::timerEvent(QTimerEvent* e)
 	int tID = e->timerId();
 	if (tID == m_Rtimer)
 	{
-		repaint();//draw imediate mode & animation
+		LARGE_INTEGER curTime;
+		/* update timing */
+		QueryPerformanceCounter(&curTime);
+		//if (m_prevTime > 0)
+		{
+			double timeDelta = (double)(curTime.QuadPart - m_prevTime.QuadPart) / (double)m_freq.QuadPart;
+			double maxTimeDelta = 1.0f / 60.0f;
+			//std::cout << "maxTimeDelta " << maxTimeDelta << "\n";
+			//std::cout << "timeDelta " << timeDelta * 1000 << "\n";
+			if (timeDelta > maxTimeDelta)
+				timeDelta = maxTimeDelta;
+			m_timeDelta = timeDelta;
+			if (m_pCamera)
+			{
+				m_pCamera->setTimeDelta(timeDelta);
+				//m_pCamera->update();
+			}
+			//std::cout << "time delta " << timeDelta << std::endl;
+		}
+		QueryPerformanceCounter(&m_prevTime);//update previous time
+		repaint();//update();//draw imediate mode & animation
 	}
 }
 
@@ -92,13 +123,41 @@ void DrawWidget::mouseMoveEvent(QMouseEvent* e)
 	//update mouse position
 	m_prevX = e->x();
 	m_prevY = e->y();
-	//update camera
-	m_pCamera->mouseUpdate(mouseDelta);
+	if (m_leftBtnPressed)
+	{
+		//update camera
+		m_pCamera->mouseUpdate(mouseDelta, Camera::mouseKeyType::LEFT_BTN);
+	}
+	else if (m_middleBtnPressed)
+	{
+		//update camera
+		m_pCamera->mouseUpdate(mouseDelta, Camera::mouseKeyType::MIDDLE_BTN);
+	}
+	else if (m_rightBtnPressed)
+	{
+		//update camera
+		m_pCamera->mouseUpdate(mouseDelta, Camera::mouseKeyType::RIGHT_BTN);
+	}
 	//repaint();
 }
 
 void DrawWidget::mousePressEvent(QMouseEvent* e)
 {
+	m_leftBtnPressed = false;
+	m_rightBtnPressed = false;
+	m_middleBtnPressed = false;
+	if (e->button() == Qt::MouseButton::LeftButton)
+	{
+		m_leftBtnPressed = true;
+	}
+	else if (e->button() == Qt::MouseButton::RightButton)
+	{
+		m_rightBtnPressed = true;
+	}
+	else if (e->button() == Qt::MouseButton::MiddleButton)
+	{
+		m_middleBtnPressed = true;
+	}
 	//save first mouse position
 	m_prevX = e->x();
 	m_prevY = e->y();
@@ -107,6 +166,9 @@ void DrawWidget::mousePressEvent(QMouseEvent* e)
 
 void DrawWidget::mouseReleaseEvent(QMouseEvent* e)
 {
+	m_leftBtnPressed = false;
+	m_rightBtnPressed = false;
+	m_middleBtnPressed = false;
 	//m_pCamera->mouseUpdate(glm::vec2(e->x(), e->y()));
 	//repaint();
 	Q_UNUSED(e)
@@ -114,6 +176,8 @@ void DrawWidget::mouseReleaseEvent(QMouseEvent* e)
 
 void DrawWidget::keyPressEvent(QKeyEvent* e)
 {
+	//std::cout << "key pressed\n";
+	repaint();//get the latest delatime
 	switch(e->key())
 	{
 	case Qt::Key::Key_W:
@@ -138,5 +202,5 @@ void DrawWidget::keyPressEvent(QKeyEvent* e)
 		emit sigClose();
 		break;
 	}
-	repaint();
+	//repaint();// to trigger immediately
 }

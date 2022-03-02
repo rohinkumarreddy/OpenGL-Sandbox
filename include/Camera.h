@@ -1,17 +1,27 @@
 #pragma once
 
 #include "glm/glm.hpp"
+#include <vector>
 
 class Camera
 {
 public:
 	Camera();
-	Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float moveSpeed, float turnSpeed);
+	Camera( glm::vec3 position,
+			glm::vec3 up,
+			float yaw,
+			float pitch,
+			float moveSpeed,
+			float turnSpeed,
+			float panSpeed);
 	~Camera();
+
+	enum class mouseKeyType{LEFT_BTN=0, MIDDLE_BTN, RIGHT_BTN};
+	enum class moveType{MV_FORWARD=0, MV_BACKWARD, MV_RIGHT, MV_LEFT, MV_UP, MV_DOWN};
 
 	glm::mat4 getWorldToViewMtx() const;
 	glm::vec3 getPosition() const;
-	void mouseUpdate(const glm::vec2& mouseDelta);
+	void mouseUpdate(const glm::vec2& mouseDelta, mouseKeyType type);
 	void moveForward();
 	void moveBackward();
 	void strafeLeft();
@@ -19,6 +29,11 @@ public:
 	void moveUp();
 	void moveDown();
 	inline void setTimeDelta(float deltaT) { m_timeDelta = deltaT; }
+	void processEvents();
+	void update();
+
+private:
+	void move();
 
 private:
 	glm::vec3 m_position;
@@ -32,6 +47,7 @@ private:
 
 	float m_moveSpeed;
 	float m_turnSpeed;
+	float m_panSpeed;
 
 	glm::vec3 m_strafeDirection;//right
 	glm::vec3 m_viewDirection;//front
@@ -39,8 +55,9 @@ private:
 	glm::vec2 m_oldMousePos;
 	float m_timeDelta;
 
-	void update();
+	std::vector<moveType> m_moveQueue;
 
+	static const float Camera::MOUSE_PAN_SPEED;
 	static const float Camera::MOVEMENT_SPEED;
 	static const float Camera::MOUSE_TURN_SPEED;
 	static const float Camera::MAX_MOUSE_DELTA;

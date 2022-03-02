@@ -34,8 +34,6 @@ Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	m_PixRatio(pixelRatio),
 	m_pCamera(nullptr)
 {
-	QueryPerformanceFrequency(&m_freq);
-	QueryPerformanceCounter(&m_prevTime);
 }
 
 Renderer::~Renderer()
@@ -209,20 +207,10 @@ void Renderer::setupScene()
 
 void Renderer::draw()
 {
-	LARGE_INTEGER curTime;
-	/* update timing */
-	QueryPerformanceCounter(&curTime);
-	//if (m_prevTime > 0)
-	{
-		double timeDelta = (double)(curTime.QuadPart - m_prevTime.QuadPart) / (double)m_freq.QuadPart;
-		if (timeDelta > 1.0f / 30.0f)
-			timeDelta = 1.0f / 30.0f;
-		m_timeDelta = timeDelta;
-		if (m_pCamera)
-			m_pCamera->setTimeDelta(timeDelta);
-		//std::cout << "time delta " << timeDelta << std::endl;
-	}
-	QueryPerformanceCounter(&m_prevTime);//update previous time
+	//std::cout << "chk3\n";
+
+	if (m_pCamera)
+		m_pCamera->update();
 
 	GLCALL(glEnable(GL_DEPTH_TEST));
 	GLCALL(glEnable(GL_CULL_FACE));
@@ -277,18 +265,6 @@ void Renderer::draw()
 	//m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
 	//m_pMesh2->renderMesh();
-
-	/* Select shader program */
-	m_pShaderPT->activate();
-
-	//Shape-4|sphere|light source
-	shModelMtx = glm::translate(lightPos) * glm::scale(glm::vec3(0.0625f, 0.0625f, 0.0625f));//model to world
-	MVPMtx = VPMtx * shModelMtx;//model to projection
-
-	//Set Uniform
-	m_pShaderPT->setUniform("u_MVPMtx", MVPMtx);//model to projection
-
-	m_pMesh6->renderMesh();
 
 	/* Select shader program */
 	m_pTexShader->activate();
@@ -357,5 +333,18 @@ void Renderer::draw()
 
 	m_pMesh1->renderMesh();
 
+	/* Select shader program */
+	m_pShaderPT->activate();
+
+	//Shape-4|sphere|light source
+	shModelMtx = glm::translate(lightPos) * glm::scale(glm::vec3(0.0625f, 0.0625f, 0.0625f));//model to world
+	MVPMtx = VPMtx * shModelMtx;//model to projection
+
+	//Set Uniform
+	m_pShaderPT->setUniform("u_MVPMtx", MVPMtx);//model to projection
+
+	m_pMesh6->renderMesh();
+
 	GLCALL(glDisable(GL_DEPTH_TEST));
+	//std::cout << "chk4\n";
 }

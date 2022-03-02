@@ -1,7 +1,10 @@
 #include "Camera.h"
 #include "glm/gtx/transform.hpp"
 
-const float Camera::MOVEMENT_SPEED = 7.0f;//0.1f;
+#define USE_QUEUED_MOVEMENT//save camera movement and perform it in draw call
+
+const float Camera::MOUSE_PAN_SPEED = 0.05f;
+const float Camera::MOVEMENT_SPEED = 5.0f;//0.1f;
 const float Camera::MOUSE_TURN_SPEED = 0.5f;
 const float Camera::MAX_MOUSE_DELTA = 5.0f;
 const float Camera::MIN_MOUSE_DELTA = -5.0f;
@@ -41,6 +44,7 @@ m_pitch(0.0f)
 	m_up = m_worldUp;
 	m_moveSpeed = MOVEMENT_SPEED;
 	m_turnSpeed = MOUSE_TURN_SPEED;
+	m_panSpeed = MOUSE_PAN_SPEED;
 
 	vec2Quaternion(m_front, m_yaw, m_pitch);
 
@@ -48,7 +52,13 @@ m_pitch(0.0f)
 }
 
 
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float moveSpeed, float turnSpeed)
+Camera::Camera( glm::vec3 position,
+				glm::vec3 up,
+				float yaw,
+				float pitch,
+				float moveSpeed,
+				float turnSpeed,
+				float panSpeed)
 	:
 	m_position(position),
 	m_worldUp(up),
@@ -58,6 +68,7 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch, float m
 	m_front(glm::vec3(0.0f, 0.0f, -1.0f)),
 	m_moveSpeed(moveSpeed),
 	m_turnSpeed(turnSpeed),
+	m_panSpeed(panSpeed),
 	m_oldMousePos(0.0f, 0.0f),
 	m_timeDelta(0),
 	m_right(1.0f, 0.0f, 0.0f)
@@ -84,6 +95,10 @@ glm::vec3 Camera::getPosition() const
 
 void Camera::update()
 {
+#ifdef USE_QUEUED_MOVEMENT
+	//perform queued moves
+	move();
+#endif
 	//Calculate vector from quaternion
 	quaternion2Vec(m_front, m_yaw, m_pitch);
 	m_front = glm::normalize(m_front);//direction
@@ -96,35 +111,127 @@ void Camera::update()
 	m_strafeDirection = m_right;
 }
 
-void Camera::mouseUpdate(const glm::vec2& mouseDelta)
+void Camera::move()
+{
+	if (!m_moveQueue.empty())
+	{
+		switch (m_moveQueue[0])
+		{
+		case(moveType::MV_FORWARD):
+		{
+			//Move forward along view direction.
+			m_position += (m_moveSpeed * m_timeDelta) * m_viewDirection;
+			break;
+		}
+		case(moveType::MV_BACKWARD):
+		{
+			//Move backward along view direction.
+			m_position += -(m_moveSpeed * m_timeDelta) * m_viewDirection;
+			break;
+		}
+		case(moveType::MV_RIGHT):
+		{
+			//Vector perpendicular to the view-direction & Y-axis plane.
+			m_position += (m_moveSpeed * m_timeDelta) * m_strafeDirection;
+			break;
+		}
+		case(moveType::MV_LEFT):
+		{
+			//Vector perpendicular to the view-direction & Y-axis plane.
+			m_position += -(m_moveSpeed * m_timeDelta) * m_strafeDirection;
+			break;
+		}
+		case(moveType::MV_UP):
+		{
+			//Y-axis is upward
+			m_position += (m_moveSpeed * m_timeDelta) * m_worldUp;
+			break;
+		}
+		case(moveType::MV_DOWN):
+		{
+			//Y-axis is upward
+			m_position += -(m_moveSpeed * m_timeDelta) * m_worldUp;
+			break;
+		}
+		default:
+			break;
+		}
+		m_moveQueue.erase(m_moveQueue.begin());
+	}
+}
+
+void Camera::mouseUpdate(const glm::vec2& mouseDelta, mouseKeyType type)
 {
 #if 1
-	//Scale x & y changes by turnspeed
-	float xChange = mouseDelta.x * m_turnSpeed;
-	float yChange = mouseDelta.y * m_turnSpeed;
+	if (type == mouseKeyType::LEFT_BTN)
+	{
+		//Scale x & y changes by turnspeed
+		float xChange = mouseDelta.x * m_turnSpeed;
+		float yChange = mouseDelta.y * m_turnSpeed;
 
-	//Clamp scaled x & y changes
-	if (xChange > MAX_MOUSE_DELTA)
-		xChange = MAX_MOUSE_DELTA;
-	if (xChange < MIN_MOUSE_DELTA)
-		xChange = MIN_MOUSE_DELTA;
+		//Clamp scaled x & y changes
+		if (xChange > MAX_MOUSE_DELTA)
+			xChange = MAX_MOUSE_DELTA;
+		if (xChange < MIN_MOUSE_DELTA)
+			xChange = MIN_MOUSE_DELTA;
 
-	if (yChange > MAX_MOUSE_DELTA)
-		yChange = MAX_MOUSE_DELTA;
-	if (yChange < MIN_MOUSE_DELTA)
-		yChange = MIN_MOUSE_DELTA;
+		if (yChange > MAX_MOUSE_DELTA)
+			yChange = MAX_MOUSE_DELTA;
+		if (yChange < MIN_MOUSE_DELTA)
+			yChange = MIN_MOUSE_DELTA;
 
-	//Update yaw & pitch
-	m_yaw += xChange;
-	m_pitch -= yChange;
+		//Update yaw & pitch
+		m_yaw += xChange;
+		m_pitch -= yChange;
 
-	//Clamp pitch value
-	if (m_pitch > MAX_PITCH)
-		m_pitch = MAX_PITCH;
+		//Clamp pitch value
+		if (m_pitch > MAX_PITCH)
+			m_pitch = MAX_PITCH;
 
-	if (m_pitch < MIN_PITCH)
-		m_pitch = MIN_PITCH;
+		if (m_pitch < MIN_PITCH)
+			m_pitch = MIN_PITCH;
+	}
+	else if (type == mouseKeyType::MIDDLE_BTN)
+	{
+		//Scale x & y changes by turnspeed
+		float xChange = mouseDelta.x * m_panSpeed;
+		float yChange = mouseDelta.y * m_panSpeed;
 
+		//Clamp scaled x & y changes
+		if (xChange > MAX_MOUSE_DELTA)
+			xChange = MAX_MOUSE_DELTA;
+		if (xChange < MIN_MOUSE_DELTA)
+			xChange = MIN_MOUSE_DELTA;
+
+		if (yChange > MAX_MOUSE_DELTA)
+			yChange = MAX_MOUSE_DELTA;
+		if (yChange < MIN_MOUSE_DELTA)
+			yChange = MIN_MOUSE_DELTA;
+
+		m_position += xChange * m_strafeDirection;
+		m_position -= yChange * m_up;
+	}
+	else if (type == mouseKeyType::RIGHT_BTN)
+	{
+		//Scale x & y changes by turnspeed
+		float xChange = mouseDelta.x * m_panSpeed;
+		float yChange = mouseDelta.y * m_panSpeed;
+
+		//Clamp scaled x & y changes
+		if (xChange > MAX_MOUSE_DELTA)
+			xChange = MAX_MOUSE_DELTA;
+		if (xChange < MIN_MOUSE_DELTA)
+			xChange = MIN_MOUSE_DELTA;
+
+		if (yChange > MAX_MOUSE_DELTA)
+			yChange = MAX_MOUSE_DELTA;
+		if (yChange < MIN_MOUSE_DELTA)
+			yChange = MIN_MOUSE_DELTA;
+
+		//m_position.x += xChange * m_viewDirection.x;
+		m_position -= yChange * m_viewDirection;
+	}
+	m_moveQueue.clear();//ignore pending move events
 	update();
 #else
 	glm::vec3 strafeDir = m_strafeDirection;
@@ -145,48 +252,72 @@ void Camera::mouseUpdate(const glm::vec2& mouseDelta)
 
 void Camera::moveForward()
 {
+#ifdef USE_QUEUED_MOVEMENT
+	m_moveQueue.push_back(moveType::MV_FORWARD);
+#else
 	//Move forward along view direction.
-	m_position += (MOVEMENT_SPEED * m_timeDelta) * m_viewDirection;
+	m_position += (m_moveSpeed * m_timeDelta) * m_viewDirection;
 	update();
 	//m_position += MOVEMENT_SPEED * m_viewDirection;
+#endif
 }
 
 void Camera::moveBackward()
 {
+#ifdef USE_QUEUED_MOVEMENT
+	m_moveQueue.push_back(moveType::MV_BACKWARD);
+#else
 	//Move backward along view direction.
-	m_position += -(MOVEMENT_SPEED * m_timeDelta) * m_viewDirection;
+	m_position += -(m_moveSpeed * m_timeDelta) * m_viewDirection;
 	update();
 	//m_position += -MOVEMENT_SPEED * m_viewDirection;
+#endif
 }
 
 void Camera::strafeLeft()
 {
+#ifdef USE_QUEUED_MOVEMENT
+	m_moveQueue.push_back(moveType::MV_LEFT);
+#else
 	//Vector perpendicular to the view-direction & Y-axis plane.
-	m_position += -(MOVEMENT_SPEED * m_timeDelta) * m_strafeDirection;
+	m_position += -(m_moveSpeed * m_timeDelta) * m_strafeDirection;
 	update();
 	//m_position += -MOVEMENT_SPEED * m_strafeDirection;
+#endif
 }
 
 void Camera::strafeRight()
 {
+#ifdef USE_QUEUED_MOVEMENT
+	m_moveQueue.push_back(moveType::MV_RIGHT);
+#else
 	//Vector perpendicular to the view-direction & Y-axis plane.
-	m_position += (MOVEMENT_SPEED * m_timeDelta) * m_strafeDirection;
+	m_position += (m_moveSpeed * m_timeDelta) * m_strafeDirection;
 	update();
 	//m_position += MOVEMENT_SPEED * m_strafeDirection;
+#endif
 }
 
 void Camera::moveUp()
 {
+#ifdef USE_QUEUED_MOVEMENT
+	m_moveQueue.push_back(moveType::MV_UP);
+#else
 	//Y-axis is upward
-	m_position += (MOVEMENT_SPEED * m_timeDelta) * m_worldUp;
+	m_position += (m_moveSpeed * m_timeDelta) * m_worldUp;
 	update();
 	//m_position += MOVEMENT_SPEED * m_up;
+#endif
 }
 
 void Camera::moveDown()
 {
+#ifdef USE_QUEUED_MOVEMENT
+	m_moveQueue.push_back(moveType::MV_DOWN);
+#else
 	//Y-axis is upward
-	m_position += -(MOVEMENT_SPEED * m_timeDelta) * m_worldUp;
+	m_position += -(m_moveSpeed * m_timeDelta) * m_worldUp;
 	update();
 	//m_position += -MOVEMENT_SPEED * m_up;
+#endif
 }

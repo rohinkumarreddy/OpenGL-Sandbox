@@ -1,7 +1,5 @@
 #pragma once
 
-#include <windows.h>
-
 //forward declaration
 class Mesh;
 class Shader;
@@ -44,9 +42,6 @@ private:
 	/* Camera */
 	Camera* m_pCamera;
 	/* Frame timing */
-	//LARGE_INTEGER m_curTime;
-	LARGE_INTEGER m_freq;
-	LARGE_INTEGER m_prevTime;
 	double m_timeDelta;
 	/* Render resolution */
 	unsigned int m_width;

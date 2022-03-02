@@ -221,6 +221,8 @@
   <ItemGroup>
     <Image Include="GraphicsPad.PNG" />
     <Image Include="Textures\brick.png" />
+    <Image Include="Textures\bricks.png" />
+    <Image Include="Textures\tiles.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

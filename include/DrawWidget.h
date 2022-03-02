@@ -38,4 +38,12 @@ private:
 	int m_Rtimer;					//render timer
 	float m_prevX;					//prev mouse x
 	float m_prevY;					//prev mouse y
+	bool m_leftBtnPressed;
+	bool m_middleBtnPressed;
+	bool m_rightBtnPressed;
+	/* Frame timing */
+	double m_timeDelta;
+	//LARGE_INTEGER m_curTime;
+	LARGE_INTEGER m_freq;
+	LARGE_INTEGER m_prevTime;
 };
