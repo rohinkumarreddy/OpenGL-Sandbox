@@ -1,15 +1,18 @@
 #include "Camera.h"
 #include "glm/gtx/transform.hpp"
 
-#define USE_QUEUED_MOVEMENT//save camera movement and perform it in draw call
+//#define USE_QUEUED_MOVEMENT//save camera movement and perform it in draw call
+//#define USE_AVG_MOUSE_MOVE
+//#define USE_AVG_KEY_MOVE
 
 const float Camera::MOUSE_PAN_SPEED = 0.05f;
-const float Camera::MOVEMENT_SPEED = 5.0f;//0.1f;
+const float Camera::MOVEMENT_SPEED = 1.5f;//0.1f;
 const float Camera::MOUSE_TURN_SPEED = 0.5f;
 const float Camera::MAX_MOUSE_DELTA = 5.0f;
 const float Camera::MIN_MOUSE_DELTA = -5.0f;
 const float Camera::MAX_PITCH = 89.0f;
 const float Camera::MIN_PITCH = -89.0f;
+const unsigned int Camera::MAX_SAMPLE_MOVE_AVG = 5;
 
 void vec2Quaternion(const glm::vec3 front, float& yaw, float& pitch)
 {
@@ -37,7 +40,9 @@ m_strafeDirection(1.0f, 0.0f, 0.0f),
 m_oldMousePos(0.0f, 0.0f),
 m_timeDelta(0),
 m_yaw(-90.0f),
-m_pitch(0.0f)
+m_pitch(0.0f),
+m_mouseDeltaAvgCnt(0),
+m_camMoveDeltaAvgCnt(0)
 {
 	m_front = m_viewDirection;
 	m_right = m_strafeDirection;
@@ -71,7 +76,9 @@ Camera::Camera( glm::vec3 position,
 	m_panSpeed(panSpeed),
 	m_oldMousePos(0.0f, 0.0f),
 	m_timeDelta(0),
-	m_right(1.0f, 0.0f, 0.0f)
+	m_right(1.0f, 0.0f, 0.0f),
+	m_mouseDeltaAvgCnt(0),
+	m_camMoveDeltaAvgCnt(0)
 {
 	m_viewDirection = m_front;
 	m_strafeDirection = m_right;
@@ -115,46 +122,81 @@ void Camera::move()
 {
 	if (!m_moveQueue.empty())
 	{
+		glm::vec3 oldPos = m_position, newPos = m_position;
 		switch (m_moveQueue[0])
 		{
 		case(moveType::MV_FORWARD):
 		{
 			//Move forward along view direction.
-			m_position += (m_moveSpeed * m_timeDelta) * m_viewDirection;
+			newPos += (m_moveSpeed * m_timeDelta) * m_viewDirection;
 			break;
 		}
 		case(moveType::MV_BACKWARD):
 		{
 			//Move backward along view direction.
-			m_position += -(m_moveSpeed * m_timeDelta) * m_viewDirection;
+			newPos += -(m_moveSpeed * m_timeDelta) * m_viewDirection;
 			break;
 		}
 		case(moveType::MV_RIGHT):
 		{
 			//Vector perpendicular to the view-direction & Y-axis plane.
-			m_position += (m_moveSpeed * m_timeDelta) * m_strafeDirection;
+			newPos += (m_moveSpeed * m_timeDelta) * m_strafeDirection;
 			break;
 		}
 		case(moveType::MV_LEFT):
 		{
 			//Vector perpendicular to the view-direction & Y-axis plane.
-			m_position += -(m_moveSpeed * m_timeDelta) * m_strafeDirection;
+			newPos += -(m_moveSpeed * m_timeDelta) * m_strafeDirection;
 			break;
 		}
 		case(moveType::MV_UP):
 		{
 			//Y-axis is upward
-			m_position += (m_moveSpeed * m_timeDelta) * m_worldUp;
+			newPos += (m_moveSpeed * m_timeDelta) * m_worldUp;
 			break;
 		}
 		case(moveType::MV_DOWN):
 		{
 			//Y-axis is upward
-			m_position += -(m_moveSpeed * m_timeDelta) * m_worldUp;
+			newPos += -(m_moveSpeed * m_timeDelta) * m_worldUp;
 			break;
 		}
 		default:
 			break;
+		}
+		if (newPos != oldPos)
+		{
+#ifdef USE_AVG_KEY_MOVE
+			glm::vec3 mDelta = newPos-oldPos;
+			//smoothen the mouse delta using average
+			{
+				//save atleast MAX_SAMPLE_MOVE_AVG
+				if (m_camMoveDeltaAvg.size() < MAX_SAMPLE_MOVE_AVG)
+					m_camMoveDeltaAvg.push_back(mDelta);
+				else
+					m_camMoveDeltaAvg[m_camMoveDeltaAvgCnt++] = mDelta;
+				//reset index
+				if (m_camMoveDeltaAvgCnt == MAX_SAMPLE_MOVE_AVG)
+					m_camMoveDeltaAvgCnt = 0;
+				//calculate average
+				if (m_camMoveDeltaAvg.size() == MAX_SAMPLE_MOVE_AVG)
+				{
+					float smoothX = 0, smoothY = 0, smoothZ = 0;
+					for each (auto var in m_camMoveDeltaAvg)
+					{
+						smoothX += var.x;
+						smoothY += var.y;
+						smoothZ += var.z;
+					}
+					mDelta.x = smoothX / MAX_SAMPLE_MOVE_AVG;
+					mDelta.y = smoothY / MAX_SAMPLE_MOVE_AVG;
+					mDelta.z = smoothZ / MAX_SAMPLE_MOVE_AVG;
+				}
+			}
+			m_position = oldPos + mDelta;
+#else
+			m_position = newPos;
+#endif
 		}
 		m_moveQueue.erase(m_moveQueue.begin());
 	}
@@ -163,11 +205,37 @@ void Camera::move()
 void Camera::mouseUpdate(const glm::vec2& mouseDelta, mouseKeyType type)
 {
 #if 1
+	glm::vec2 mDelta = mouseDelta;
+#ifdef USE_AVG_MOUSE_MOVE
+	//smoothen the mouse delta using average
+	{
+		//save atleast MAX_SAMPLE_MOVE_AVG
+		if (m_mouseDeltaAvg.size() < MAX_SAMPLE_MOVE_AVG)
+			m_mouseDeltaAvg.push_back(mouseDelta);
+		else
+			m_mouseDeltaAvg[m_mouseDeltaAvgCnt++] = mouseDelta;
+		//reset index
+		if (m_mouseDeltaAvgCnt == MAX_SAMPLE_MOVE_AVG)
+			m_mouseDeltaAvgCnt = 0;
+		//calculate average
+		if (m_mouseDeltaAvg.size() == MAX_SAMPLE_MOVE_AVG)
+		{
+			float smoothX = 0, smoothY = 0;
+			for each (auto var in m_mouseDeltaAvg)
+			{
+				smoothX += var.x;
+				smoothY += var.y;
+			}
+			mDelta.x = smoothX / MAX_SAMPLE_MOVE_AVG;
+			mDelta.y = smoothY / MAX_SAMPLE_MOVE_AVG;
+		}
+	}
+#endif
 	if (type == mouseKeyType::LEFT_BTN)
 	{
 		//Scale x & y changes by turnspeed
-		float xChange = mouseDelta.x * m_turnSpeed;
-		float yChange = mouseDelta.y * m_turnSpeed;
+		float xChange = mDelta.x * m_turnSpeed;
+		float yChange = mDelta.y * m_turnSpeed;
 
 		//Clamp scaled x & y changes
 		if (xChange > MAX_MOUSE_DELTA)
@@ -194,8 +262,8 @@ void Camera::mouseUpdate(const glm::vec2& mouseDelta, mouseKeyType type)
 	else if (type == mouseKeyType::MIDDLE_BTN)
 	{
 		//Scale x & y changes by turnspeed
-		float xChange = mouseDelta.x * m_panSpeed;
-		float yChange = mouseDelta.y * m_panSpeed;
+		float xChange = mDelta.x * m_panSpeed;
+		float yChange = mDelta.y * m_panSpeed;
 
 		//Clamp scaled x & y changes
 		if (xChange > MAX_MOUSE_DELTA)
@@ -214,8 +282,8 @@ void Camera::mouseUpdate(const glm::vec2& mouseDelta, mouseKeyType type)
 	else if (type == mouseKeyType::RIGHT_BTN)
 	{
 		//Scale x & y changes by turnspeed
-		float xChange = mouseDelta.x * m_panSpeed;
-		float yChange = mouseDelta.y * m_panSpeed;
+		float xChange = mDelta.x * m_panSpeed;
+		float yChange = mDelta.y * m_panSpeed;
 
 		//Clamp scaled x & y changes
 		if (xChange > MAX_MOUSE_DELTA)
@@ -231,7 +299,7 @@ void Camera::mouseUpdate(const glm::vec2& mouseDelta, mouseKeyType type)
 		//m_position.x += xChange * m_viewDirection.x;
 		m_position -= yChange * m_viewDirection;
 	}
-	m_moveQueue.clear();//ignore pending move events
+	//m_moveQueue.clear();//ignore pending move events
 	update();
 #else
 	glm::vec3 strafeDir = m_strafeDirection;

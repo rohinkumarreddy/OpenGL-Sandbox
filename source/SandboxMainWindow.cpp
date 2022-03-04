@@ -1,4 +1,5 @@
 #include "SandboxMainWindow.h"
+#include <iostream>
 
 SandboxMainWindow::SandboxMainWindow(QWidget *parent)
     : QMainWindow(parent/*,Qt::ToolTip*/)
@@ -13,6 +14,7 @@ SandboxMainWindow::SandboxMainWindow(QWidget *parent)
     connect(ui.lSliderKQ, &QSlider::valueChanged, this, &SandboxMainWindow::attnSliderChanged);
     connect(ui.lSlidercutoff, &QSlider::valueChanged, this, &SandboxMainWindow::attnSliderChanged);
     connect(ui.openGLWidget, &DrawWidget::sigClose, this, &SandboxMainWindow::close);
+    connect(ui.openGLWidget, &DrawWidget::sigToggleFullScreen, this, &SandboxMainWindow::toggleFullScreen);
     //trigger initial slider values
     xyzSliderChanged();
     attnSliderChanged();
@@ -54,4 +56,12 @@ void SandboxMainWindow::colorSliderChanged()
     ui.KqLbl->setText(QString::number(kQ));
     m_LightData.attenuation = glm::vec4(kC, kL, kQ, 0);
     ui.openGLWidget->repaint();
+}
+
+void SandboxMainWindow::toggleFullScreen()
+{
+    if (isFullScreen())
+        showNormal();
+    else
+        showFullScreen();
 }

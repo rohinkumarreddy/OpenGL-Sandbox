@@ -224,7 +224,7 @@ void Renderer::draw()
 	/* Matrix transformations */
 	//Done only to learn | not optimal memory wise
 	glm::mat4 MVPMtx = glm::mat4(1.0f);
-	glm::mat4 projMtx = glm::perspective(glm::radians(60.0f),
+	glm::mat4 projMtx = glm::perspective(glm::radians(45.0f),
 		((float)m_width) / m_height, 0.1f, 100.0f);//view to projection
 	glm::mat4 viewMtx = m_pCamera->getWorldToViewMtx();//world to view
 	glm::mat4 VPMtx = projMtx * viewMtx;//world to projection

@@ -19,4 +19,5 @@ private slots:
     void xyzSliderChanged();
     void attnSliderChanged();
     void colorSliderChanged();
+    void toggleFullScreen();
 };

@@ -19,6 +19,7 @@ public:
 protected:
 	void initializeGL();
 	void paintGL();
+	//void paintEvent(QPaintEvent*);
 	void mouseMoveEvent(QMouseEvent*);
 	void mousePressEvent(QMouseEvent*);
 	void mouseReleaseEvent(QMouseEvent*);
@@ -30,8 +31,10 @@ private:
 	void initVertexArrays();
 	void installShader();
 	void drawIncTriangle();
+	void pollKeyState();
 signals:
 	void sigClose();
+	void sigToggleFullScreen();
 private:
 	Camera* m_pCamera;				//view camera
 	Renderer* m_pRenderer;			//renderer object

@@ -56,6 +56,10 @@ private:
 	float m_timeDelta;
 
 	std::vector<moveType> m_moveQueue;
+	std::vector<glm::vec2> m_mouseDeltaAvg;//calculate average of recent 5 delta
+	int m_mouseDeltaAvgCnt;//count number of saved delta's
+	std::vector<glm::vec3> m_camMoveDeltaAvg;//calculate average of recent 5 delta
+	int m_camMoveDeltaAvgCnt;//count number of saved delta's
 
 	static const float Camera::MOUSE_PAN_SPEED;
 	static const float Camera::MOVEMENT_SPEED;
@@ -64,4 +68,5 @@ private:
 	static const float Camera::MIN_MOUSE_DELTA;
 	static const float Camera::MAX_PITCH;
 	static const float Camera::MIN_PITCH;
+	static const unsigned int Camera::MAX_SAMPLE_MOVE_AVG;
 };

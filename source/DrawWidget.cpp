@@ -21,7 +21,6 @@
 //const uint TRIANGLE_BYTE_SIZE = NUM_VERTICES_PER_TRI * NUM_FLOATS_PER_VTX * sizeof(float);
 //const uint MAX_TRIS = 20;
 
-
 DrawWidget::DrawWidget(QWidget* parent)
 	: QGLWidget(parent),
 	m_pCamera(new Camera),
@@ -35,9 +34,13 @@ DrawWidget::DrawWidget(QWidget* parent)
 {
 #ifndef NDEBUG
 	std::cout << "QT OpenGL version " << this->format().majorVersion() << "." << this->format().minorVersion() << std::endl;
+	std::cout << "swap interval " << format().swapInterval() << "\n";
 #endif
+	/*QGLFormat sf = this->format();
+	sf.setSwapInterval(0);
+	this->setFormat(sf);*/
 	m_pRenderer = new Renderer(width(), height(), devicePixelRatio());
-	m_Rtimer = startTimer(0, Qt::TimerType::PreciseTimer);
+	m_Rtimer = startTimer(0);
 	QueryPerformanceFrequency(&m_freq);
 	QueryPerformanceCounter(&m_prevTime);
 	//std::cout<<"double buffer "<<(doubleBuffer() ? "true\n" : "false\n");
@@ -88,6 +91,8 @@ void DrawWidget::timerEvent(QTimerEvent* e)
 	int tID = e->timerId();
 	if (tID == m_Rtimer)
 	{
+		//query/poll for key press events
+		pollKeyState();
 		LARGE_INTEGER curTime;
 		/* update timing */
 		QueryPerformanceCounter(&curTime);
@@ -176,9 +181,10 @@ void DrawWidget::mouseReleaseEvent(QMouseEvent* e)
 
 void DrawWidget::keyPressEvent(QKeyEvent* e)
 {
+	Q_UNUSED(e)
 	//std::cout << "key pressed\n";
-	repaint();//get the latest delatime
-	switch(e->key())
+	//repaint();//get the latest delatime
+	/*switch(e->key())
 	{
 	case Qt::Key::Key_W:
 		m_pCamera->moveForward();
@@ -201,6 +207,37 @@ void DrawWidget::keyPressEvent(QKeyEvent* e)
 	case Qt::Key::Key_Escape:
 		emit sigClose();
 		break;
+	case Qt::Key::Key_Return:
+	{
+		emit sigToggleFullScreen();
+		break;
 	}
+	}*/
 	//repaint();// to trigger immediately
+}
+
+void DrawWidget::pollKeyState()
+{
+	const int KEY_W = 0x57;
+	const int KEY_S = 0x53;
+	const int KEY_A = 0x41;
+	const int KEY_D = 0x44;
+	const int KEY_R = 0x52;
+	const int KEY_F = 0x46;
+	if(GetAsyncKeyState(KEY_W) || GetAsyncKeyState(VK_UP))
+		m_pCamera->moveForward();
+	if(GetAsyncKeyState(KEY_S) || GetAsyncKeyState(VK_DOWN))
+		m_pCamera->moveBackward();
+	if(GetAsyncKeyState(KEY_A) || GetAsyncKeyState(VK_LEFT))
+		m_pCamera->strafeLeft();
+	if(GetAsyncKeyState(KEY_D) || GetAsyncKeyState(VK_RIGHT))
+		m_pCamera->strafeRight();
+	if(GetAsyncKeyState(KEY_R))
+		m_pCamera->moveUp();
+	if(GetAsyncKeyState(KEY_F))
+		m_pCamera->moveDown();
+	if(GetAsyncKeyState(VK_ESCAPE))
+		emit sigClose();
+	if(GetAsyncKeyState(VK_RETURN))
+		emit sigToggleFullScreen();
 }
