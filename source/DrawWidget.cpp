@@ -73,6 +73,26 @@ void DrawWidget::initializeGL()
 
 void DrawWidget::paintGL()
 {
+	LARGE_INTEGER curTime;
+	/* update timing */
+	QueryPerformanceCounter(&curTime);
+	//if (m_prevTime > 0)
+	{
+		double timeDelta = (double)(curTime.QuadPart - m_prevTime.QuadPart) / (double)m_freq.QuadPart;
+		double maxTimeDelta = 1.0f / 60.0f;
+		//std::cout << "maxTimeDelta " << maxTimeDelta << "\n";
+		//std::cout << "timeDelta " << timeDelta * 1000 << "\n";
+		if (timeDelta > maxTimeDelta)
+			timeDelta = maxTimeDelta;
+		m_timeDelta = timeDelta;
+		if (m_pCamera)
+		{
+			m_pCamera->setTimeDelta(timeDelta);
+			//m_pCamera->update();
+		}
+		//std::cout << "time delta " << timeDelta << std::endl;
+	}
+	QueryPerformanceCounter(&m_prevTime);//update previous time
 	//std::cout << "chk2\n";
 	m_pRenderer->draw();
 	//std::cout << "chk5\n";
@@ -93,26 +113,6 @@ void DrawWidget::timerEvent(QTimerEvent* e)
 	{
 		//query/poll for key press events
 		pollKeyState();
-		LARGE_INTEGER curTime;
-		/* update timing */
-		QueryPerformanceCounter(&curTime);
-		//if (m_prevTime > 0)
-		{
-			double timeDelta = (double)(curTime.QuadPart - m_prevTime.QuadPart) / (double)m_freq.QuadPart;
-			double maxTimeDelta = 1.0f / 60.0f;
-			//std::cout << "maxTimeDelta " << maxTimeDelta << "\n";
-			//std::cout << "timeDelta " << timeDelta * 1000 << "\n";
-			if (timeDelta > maxTimeDelta)
-				timeDelta = maxTimeDelta;
-			m_timeDelta = timeDelta;
-			if (m_pCamera)
-			{
-				m_pCamera->setTimeDelta(timeDelta);
-				//m_pCamera->update();
-			}
-			//std::cout << "time delta " << timeDelta << std::endl;
-		}
-		QueryPerformanceCounter(&m_prevTime);//update previous time
 		repaint();//update();//draw imediate mode & animation
 	}
 }
