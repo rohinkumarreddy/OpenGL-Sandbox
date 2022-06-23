@@ -16,11 +16,6 @@ uniform vec4 u_lAttenuationFac; //light attenuation fators|(kC,kL,kQ,cuttoff)
 
 uniform sampler2D texSample;
 
-/* light attenuation factors */
-//float kc = 0.5;					//constant attenuation factor
-//float kl = 2.0;					//linear attenuation factor
-//float kq = 0.2;					//quadratic attenuation factor
-
 float LightAttenuation(float lightDist, float lightRad)
 {
 	lightDist = max(lightDist - lightRad, 0);
@@ -63,21 +58,9 @@ void main()
 	specularity = pow(specularity, 50);//specular exponent
 	vec4 specularLight = vec4(specularity, specularity, specularity, 1);//color from specular light
 	
-//	/* light attenuation */
-//	float linearComponent = kl*lightDist;
-//	float quadraticComponent = kq*pow(lightDist,2);
-//	float lightAttenuation = 1.0/(kc+linearComponent+quadraticComponent);
+	/* light attenuation */
 	float lightAttenuation = LightAttenuation(lightDist, 0.25);
 
-//	color = (u_ambientLight + lightAttenuation * clamp(diffuseLight, 0, 1)) * texture(texSample, p_texCoords) +
-//			 lightAttenuation * specularLight;
 	color = (u_ambientLight + lightAttenuation * clamp(diffuseLight, 0, 1) +
 	lightAttenuation * specularLight)* clamp(texture(texSample, p_texCoords), 0, 1);
 }
-
-/* //Diffusion + ambient light
-color = vec4(brightness + u_ambientLight.x,
-brightness + u_ambientLight.y,
-brightness + u_ambientLight.z, 1.0);	//color with light*/
-
-//color = vec4(p_color, 1.0);

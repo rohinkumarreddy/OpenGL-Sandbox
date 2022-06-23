@@ -180,7 +180,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <QtRcc Include="Sandbox.qrc" />
-    <QtUic Include="Sandbox.ui" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Camera.h" />

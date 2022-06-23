@@ -21,8 +21,8 @@
 //const uint TRIANGLE_BYTE_SIZE = NUM_VERTICES_PER_TRI * NUM_FLOATS_PER_VTX * sizeof(float);
 //const uint MAX_TRIS = 20;
 
-DrawWidget::DrawWidget(QWidget* parent)
-	: QGLWidget(parent),
+DrawWidget::DrawWidget(QGLFormat& fmt, QWidget* parent)
+	: QGLWidget(fmt,parent),
 	m_pCamera(new Camera),
 	m_pRenderer(nullptr),
 	m_prevX(0),
@@ -36,9 +36,6 @@ DrawWidget::DrawWidget(QWidget* parent)
 	std::cout << "QT OpenGL version " << this->format().majorVersion() << "." << this->format().minorVersion() << std::endl;
 	std::cout << "swap interval " << format().swapInterval() << "\n";
 #endif
-	/*QGLFormat sf = this->format();
-	sf.setSwapInterval(0);
-	this->setFormat(sf);*/
 	m_pRenderer = new Renderer(width(), height(), devicePixelRatio());
 	m_Rtimer = startTimer(0);
 	QueryPerformanceFrequency(&m_freq);

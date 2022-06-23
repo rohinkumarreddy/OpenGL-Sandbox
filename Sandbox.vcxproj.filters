@@ -4,9 +4,6 @@
     <QtRcc Include="Sandbox.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="Sandbox.ui" />
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Source">
       <UniqueIdentifier>{6d93cbd6-93b6-4db7-aa2b-b466b6c402f6}</UniqueIdentifier>
     </Filter>

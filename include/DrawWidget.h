@@ -13,7 +13,7 @@ class DrawWidget : public QGLWidget
 	Q_OBJECT
 
 public:
-	DrawWidget(QWidget* parent = nullptr);
+	DrawWidget(QGLFormat& fmt, QWidget* parent = nullptr);
 	~DrawWidget();
 	void setLDataPtr(lightData* vlightData);
 protected:
