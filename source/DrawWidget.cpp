@@ -140,6 +140,13 @@ void DrawWidget::mouseMoveEvent(QMouseEvent* e)
 		//update camera
 		m_pCamera->mouseUpdate(mouseDelta, Camera::mouseKeyType::RIGHT_BTN);
 	}
+	QPoint glob = mapToGlobal(QPoint(width() / 2, height() / 2));
+	QCursor::setPos(glob);
+	//update mouse position
+	QPoint lastPos = QPoint(width() / 2, height() / 2);
+	m_prevX = lastPos.x();
+	m_prevY = lastPos.y();
+	QGLWidget::mouseMoveEvent(e);
 	//repaint();
 }
 
@@ -163,6 +170,14 @@ void DrawWidget::mousePressEvent(QMouseEvent* e)
 	//save first mouse position
 	m_prevX = e->x();
 	m_prevY = e->y();
+	QPoint glob = mapToGlobal(QPoint(width() / 2, height() / 2));
+	QCursor::setPos(glob);
+	//update mouse position
+	QPoint lastPos = QPoint(width() / 2, height() / 2);
+	m_prevX = lastPos.x();
+	m_prevY = lastPos.y();
+	this->setCursor(Qt::BlankCursor);
+	QGLWidget::mousePressEvent(e);
 	//repaint();
 }
 
@@ -171,8 +186,10 @@ void DrawWidget::mouseReleaseEvent(QMouseEvent* e)
 	m_leftBtnPressed = false;
 	m_rightBtnPressed = false;
 	m_middleBtnPressed = false;
+	this->setCursor(Qt::ArrowCursor);
 	//m_pCamera->mouseUpdate(glm::vec2(e->x(), e->y()));
 	//repaint();
+	QGLWidget::mouseReleaseEvent(e);
 	Q_UNUSED(e)
 }
 
