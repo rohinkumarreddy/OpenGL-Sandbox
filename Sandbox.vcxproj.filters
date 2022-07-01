@@ -16,6 +16,9 @@
     <Filter Include="Textures">
       <UniqueIdentifier>{39612707-3065-4fb9-99af-96a46552b89d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vendor">
+      <UniqueIdentifier>{da10c78f-1f55-4fb5-99c5-010feb438c51}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Camera.h">
@@ -51,6 +54,9 @@
     <ClInclude Include="include\Texture.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="vendor\qtimgui\QtImGui.h">
+      <Filter>vendor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="include\DrawWidget.h">
@@ -58,6 +64,9 @@
     </QtMoc>
     <QtMoc Include="include\SandboxMainWindow.h">
       <Filter>Include</Filter>
+    </QtMoc>
+    <QtMoc Include="vendor\qtimgui\ImGuiRenderer.h">
+      <Filter>vendor</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
@@ -90,6 +99,12 @@
     </ClCompile>
     <ClCompile Include="source\Texture.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\qtimgui\ImGuiRenderer.cpp">
+      <Filter>vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\qtimgui\QtImGui.cpp">
+      <Filter>vendor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

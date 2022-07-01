@@ -193,6 +193,8 @@
     <ClInclude Include="include\TeapotData.h" />
     <ClInclude Include="include\Texture.h" />
     <ClInclude Include="include\Vertex.h" />
+    <ClInclude Include="vendor\qtimgui\QtImGui.h" />
+    <QtMoc Include="vendor\qtimgui\ImGuiRenderer.h" />
     <QtMoc Include="include\SandboxMainWindow.h" />
     <QtMoc Include="include\DrawWidget.h" />
   </ItemGroup>
@@ -207,6 +209,8 @@
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\ShapeGenerator.cpp" />
     <ClCompile Include="source\Texture.cpp" />
+    <ClCompile Include="vendor\qtimgui\ImGuiRenderer.cpp" />
+    <ClCompile Include="vendor\qtimgui\QtImGui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

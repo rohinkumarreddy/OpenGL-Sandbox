@@ -14,6 +14,9 @@
 
 #include <iostream>
 #include <fstream>
+#define IMGUI_IMPLEMENTATION
+#include "vendor/qtimgui/QtImGui.h"
+#include "vendor/imgui_single_file.h"
 
 //const float X_DELTA = 0.1f;
 //const uint NUM_VERTICES_PER_TRI = 3;
@@ -72,6 +75,7 @@ void DrawWidget::initializeGL()
 {
 	m_pRenderer->initialize();
 	m_pRenderer->setCameraRef(m_pCamera);
+	QtImGui::initialize(this);
 }
 
 void DrawWidget::paintGL()
@@ -79,6 +83,8 @@ void DrawWidget::paintGL()
 	LARGE_INTEGER curTime;
 	/* update timing */
 	QueryPerformanceCounter(&curTime);
+	QtImGui::newFrame();
+	ImGui::Text("Hello, world!");
 	//if (m_prevTime > 0)
 	{
 		double timeDelta = (double)(curTime.QuadPart - m_prevTime.QuadPart) / (double)m_freq.QuadPart;
@@ -99,6 +105,8 @@ void DrawWidget::paintGL()
 	//std::cout << "chk2\n";
 	m_pRenderer->draw();
 	//std::cout << "chk5\n";
+	ImGui::Render();
+	QtImGui::render();
 }
 
 void DrawWidget::resizeEvent(QResizeEvent* e)
@@ -123,7 +131,6 @@ void DrawWidget::timerEvent(QTimerEvent* e)
 
 void DrawWidget::mouseMoveEvent(QMouseEvent* e)
 {
-
 	QOpenGLWidget *wgt = new QOpenGLWidget();
 	//current mouse position
 	glm::vec2 prevMousePos(m_prevX, m_prevY);
@@ -149,12 +156,14 @@ void DrawWidget::mouseMoveEvent(QMouseEvent* e)
 		//update camera
 		m_pCamera->mouseUpdate(mouseDelta, Camera::mouseKeyType::RIGHT_BTN);
 	}
+#ifdef HIDEN_MOUSE_CAMERA
 	QPoint glob = mapToGlobal(QPoint(width() / 2, height() / 2));
 	QCursor::setPos(glob);
 	//update mouse position
 	QPoint lastPos = QPoint(width() / 2, height() / 2);
 	m_prevX = lastPos.x();
 	m_prevY = lastPos.y();
+#endif
 	QOpenGLWidget::mouseMoveEvent(e);
 	//repaint();
 }
@@ -179,6 +188,7 @@ void DrawWidget::mousePressEvent(QMouseEvent* e)
 	//save first mouse position
 	m_prevX = e->x();
 	m_prevY = e->y();
+#ifdef HIDEN_MOUSE_CAMERA
 	QPoint glob = mapToGlobal(QPoint(width() / 2, height() / 2));
 	QCursor::setPos(glob);
 	//update mouse position
@@ -186,6 +196,7 @@ void DrawWidget::mousePressEvent(QMouseEvent* e)
 	m_prevX = lastPos.x();
 	m_prevY = lastPos.y();
 	this->setCursor(Qt::BlankCursor);
+#endif
 	QOpenGLWidget::mousePressEvent(e);
 	//repaint();
 }
