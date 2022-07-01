@@ -380,11 +380,7 @@ void SandboxMainWindow::setupUi()
 
     verticalLayout->addLayout(horizontalLayout_2);
 
-    QGLFormat sf;
-    sf.setSwapInterval(0);
-    sf.setSamples(4);
-    sf.setDoubleBuffer(true);
-    openGLWidget = new DrawWidget(sf, centralWidget);
+    openGLWidget = new DrawWidget(centralWidget);
     openGLWidget->setObjectName(QString::fromUtf8("openGLWidget"));
     QSizePolicy sizePolicy2(QSizePolicy::Preferred, QSizePolicy::Expanding);
     sizePolicy2.setHorizontalStretch(0);

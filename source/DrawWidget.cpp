@@ -21,8 +21,8 @@
 //const uint TRIANGLE_BYTE_SIZE = NUM_VERTICES_PER_TRI * NUM_FLOATS_PER_VTX * sizeof(float);
 //const uint MAX_TRIS = 20;
 
-DrawWidget::DrawWidget(QGLFormat& fmt, QWidget* parent)
-	: QGLWidget(fmt,parent),
+DrawWidget::DrawWidget(QWidget* parent)
+	: QOpenGLWidget(parent),
 	m_pCamera(new Camera),
 	m_pRenderer(nullptr),
 	m_prevX(0),
@@ -32,10 +32,16 @@ DrawWidget::DrawWidget(QGLFormat& fmt, QWidget* parent)
 	m_rightBtnPressed(false),
 	m_middleBtnPressed(false)
 {
+	QSurfaceFormat fmt = this->format();
+	//fmt.setSwapInterval(0);//VSYNC
+	fmt.setSamples(4);//AntiAliasing
+	fmt.setSwapBehavior(QSurfaceFormat::SwapBehavior::DoubleBuffer);
+	this->setFormat(fmt);
 #ifndef NDEBUG
 	std::cout << "QT OpenGL version " << this->format().majorVersion() << "." << this->format().minorVersion() << std::endl;
 	std::cout << "swap interval " << format().swapInterval() << "\n";
 #endif
+
 	m_pRenderer = new Renderer(width(), height(), devicePixelRatio());
 	m_Rtimer = startTimer(0);
 	QueryPerformanceFrequency(&m_freq);
@@ -100,7 +106,8 @@ void DrawWidget::resizeEvent(QResizeEvent* e)
 	m_pRenderer->setWidth(width());
 	m_pRenderer->setHeight(height());
 	//repaint();
-	Q_UNUSED(e);
+	//Q_UNUSED(e);
+	QOpenGLWidget::resizeEvent(e);
 }
 
 void DrawWidget::timerEvent(QTimerEvent* e)
@@ -116,6 +123,8 @@ void DrawWidget::timerEvent(QTimerEvent* e)
 
 void DrawWidget::mouseMoveEvent(QMouseEvent* e)
 {
+
+	QOpenGLWidget *wgt = new QOpenGLWidget();
 	//current mouse position
 	glm::vec2 prevMousePos(m_prevX, m_prevY);
 	//current mouse position
@@ -146,7 +155,7 @@ void DrawWidget::mouseMoveEvent(QMouseEvent* e)
 	QPoint lastPos = QPoint(width() / 2, height() / 2);
 	m_prevX = lastPos.x();
 	m_prevY = lastPos.y();
-	QGLWidget::mouseMoveEvent(e);
+	QOpenGLWidget::mouseMoveEvent(e);
 	//repaint();
 }
 
@@ -177,7 +186,7 @@ void DrawWidget::mousePressEvent(QMouseEvent* e)
 	m_prevX = lastPos.x();
 	m_prevY = lastPos.y();
 	this->setCursor(Qt::BlankCursor);
-	QGLWidget::mousePressEvent(e);
+	QOpenGLWidget::mousePressEvent(e);
 	//repaint();
 }
 
@@ -189,7 +198,7 @@ void DrawWidget::mouseReleaseEvent(QMouseEvent* e)
 	this->setCursor(Qt::ArrowCursor);
 	//m_pCamera->mouseUpdate(glm::vec2(e->x(), e->y()));
 	//repaint();
-	QGLWidget::mouseReleaseEvent(e);
+	QOpenGLWidget::mouseReleaseEvent(e);
 	Q_UNUSED(e)
 }
 

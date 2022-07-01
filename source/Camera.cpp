@@ -7,7 +7,7 @@
 
 const float Camera::MOUSE_PAN_SPEED = 0.05f;
 const float Camera::MOVEMENT_SPEED = 1.5f;//0.1f;
-const float Camera::MOUSE_TURN_SPEED = 0.5f;
+const float Camera::MOUSE_TURN_SPEED = 0.05f;
 const float Camera::MAX_MOUSE_DELTA = 5.0f;
 const float Camera::MIN_MOUSE_DELTA = -5.0f;
 const float Camera::MAX_PITCH = 89.0f;
@@ -25,6 +25,15 @@ void quaternion2Vec(glm::vec3& front, const float yaw, const float pitch)
 	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 	front.y = sin(glm::radians(pitch));
 	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+}
+
+void smooth_mouse(float time_d, float& dx, float& dy)
+{
+	const float springiness = 75; // tweak to taste.
+	double d = 1 - exp(log(0.5) * springiness * time_d);
+
+	dx += dx * d;
+	dy += dy * d;
 }
 
 Camera::Camera()
@@ -237,6 +246,9 @@ void Camera::mouseUpdate(const glm::vec2& mouseDelta, mouseKeyType type)
 		float xChange = mDelta.x * m_turnSpeed;
 		float yChange = mDelta.y * m_turnSpeed;
 
+		//Exponential decay & delta time based smoothing
+		smooth_mouse(m_timeDelta, mDelta.x, mDelta.y);
+
 		//Clamp scaled x & y changes
 		if (xChange > MAX_MOUSE_DELTA)
 			xChange = MAX_MOUSE_DELTA;
@@ -265,6 +277,9 @@ void Camera::mouseUpdate(const glm::vec2& mouseDelta, mouseKeyType type)
 		float xChange = mDelta.x * m_panSpeed;
 		float yChange = mDelta.y * m_panSpeed;
 
+		//Exponential decay & delta time based smoothing
+		smooth_mouse(m_timeDelta, mDelta.x, mDelta.y);
+
 		//Clamp scaled x & y changes
 		if (xChange > MAX_MOUSE_DELTA)
 			xChange = MAX_MOUSE_DELTA;
@@ -284,6 +299,9 @@ void Camera::mouseUpdate(const glm::vec2& mouseDelta, mouseKeyType type)
 		//Scale x & y changes by turnspeed
 		float xChange = mDelta.x * m_panSpeed;
 		float yChange = mDelta.y * m_panSpeed;
+
+		//Exponential decay & delta time based smoothing
+		smooth_mouse(m_timeDelta, mDelta.x, mDelta.y);
 
 		//Clamp scaled x & y changes
 		if (xChange > MAX_MOUSE_DELTA)

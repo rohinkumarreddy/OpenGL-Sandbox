@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QGLWidget>
+#include <QOpenGLWidget>
 
 //forward declaration
 class QWidget;
@@ -8,12 +8,12 @@ class Camera;
 class Renderer;
 struct lightData;
 
-class DrawWidget : public QGLWidget
+class DrawWidget : public QOpenGLWidget
 {
 	Q_OBJECT
 
 public:
-	DrawWidget(QGLFormat& fmt, QWidget* parent = nullptr);
+	DrawWidget(QWidget* parent = nullptr);
 	~DrawWidget();
 	void setLDataPtr(lightData* vlightData);
 protected:
