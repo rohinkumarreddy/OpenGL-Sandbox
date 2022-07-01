@@ -18,6 +18,7 @@
 #include "vendor/qtimgui/QtImGui.h"
 #include "vendor/imgui_single_file.h"
 
+//#define HIDEN_MOUSE_CAMERA
 //const float X_DELTA = 0.1f;
 //const uint NUM_VERTICES_PER_TRI = 3;
 //const uint NUM_FLOATS_PER_VTX = 6;
