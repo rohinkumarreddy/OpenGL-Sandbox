@@ -10,7 +10,6 @@ out vec4 color;
 
 /* Uniforms */
 uniform vec4 u_ambientLight;	//ambient light|brightness
-uniform vec4 u_diffusedLight;	//diffused light|brightness
 uniform vec3 u_lightPos;		//light source postion|world space
 uniform vec3 u_eyePos;			//eye postion|world space
 uniform vec4 u_lAttenuationFac; //light attenuation fators|(kC,kL,kQ,cuttoff)
@@ -62,6 +61,6 @@ void main()
 	/* light attenuation */
 	float lightAttenuation = LightAttenuation(lightDist, 0.25);
 
-	color = (u_ambientLight + lightAttenuation * clamp(u_diffusedLight*diffuseLight, 0, 1) +
+	color = (u_ambientLight + lightAttenuation * clamp(diffuseLight, 0, 1) +
 	lightAttenuation * specularLight)* clamp(texture(texSample, p_texCoords), 0, 1);
 }

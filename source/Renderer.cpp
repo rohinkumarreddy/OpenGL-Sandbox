@@ -11,6 +11,7 @@
 #include "Camera.h"
 #include "ShapeGenerator.h"
 #include "lightData.h"
+#include "PointLight.h"
 
 Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	:
@@ -32,7 +33,8 @@ Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	m_width(width),
 	m_height(height),
 	m_PixRatio(pixelRatio),
-	m_pCamera(nullptr)
+	m_pCamera(nullptr),
+	m_pPointLight(new PointLight())
 {
 }
 
@@ -91,6 +93,11 @@ Renderer::~Renderer()
 	if (m_pShaderPT != nullptr)
 		delete m_pShaderPT;
 	m_pShaderPT = nullptr;
+
+	//Clean-up lights
+	if (m_pPointLight != nullptr)
+		delete m_pPointLight;
+	m_pPointLight = nullptr;
 }
 
 void Renderer::initialize()
@@ -135,6 +142,7 @@ void Renderer::initialize()
 	/* Query uniform */
 	m_pTexShader->initUniforms(std::vector<std::string>{"u_MVPMtx",
 		"u_ambientLight",
+		"u_diffusedLight",
 		"u_lightPos",
 		"u_eyePos",
 		"u_MWMtx",
@@ -207,8 +215,6 @@ void Renderer::setupScene()
 
 void Renderer::draw()
 {
-	//std::cout << "chk3\n";
-
 	if (m_pCamera)
 		m_pCamera->update();
 
@@ -225,23 +231,21 @@ void Renderer::draw()
 	//Done only to learn | not optimal memory wise
 	glm::mat4 MVPMtx = glm::mat4(1.0f);
 	glm::mat4 projMtx = glm::perspective(glm::radians(45.0f),
-		((float)m_width) / m_height, 0.1f, 100.0f);//view to projection
+						((float)m_width) / m_height, 0.1f, 100.0f);//view to projection
 	glm::mat4 viewMtx = m_pCamera->getWorldToViewMtx();//world to view
 	glm::mat4 VPMtx = projMtx * viewMtx;//world to projection
 	glm::vec3 eyePos = m_pCamera->getPosition();//eye position|world space
 
-	//Ambient-light
-	glm::vec4 ambientLight(0.1f, 0.1f, 0.1f, 1.0f);
+	//Ambient-light|Diffused-light
+	m_pPointLight->setIntensity(0.1f, 1.0f);
 
 	//Light-source
-	glm::vec3 lightPos(0.0f, 3.0f, 0.0f);
 	if (m_pLightData)
-		lightPos = m_pLightData->pos;
+		m_pPointLight->setPosition(m_pLightData->pos);
 
 	//Light attenuation(kC, kL, kQ)
-	glm::vec4 lightAttn(0.0025f, 0.0025f, 0.0025f, 0);
 	if (m_pLightData)
-		lightAttn = m_pLightData->attenuation;
+		m_pPointLight->setAttenuation(m_pLightData->attenuation);
 
 	/* Select texture */
 	m_pTex1->activate();
@@ -275,12 +279,11 @@ void Renderer::draw()
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
-	m_pTexShader->setUniform("u_ambientLight", ambientLight);
 	m_pTexShader->setUniform("u_eyePos", eyePos);
-	m_pTexShader->setUniform("u_lightPos", lightPos);
-	m_pTexShader->setUniform("u_lAttenuationFac", lightAttn);
 	m_pTexShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
+	//Set-up light
+	m_pPointLight->UseLight(m_pTexShader);
 
 	m_pTexMesh->renderMesh();
 
@@ -324,7 +327,7 @@ void Renderer::draw()
 	shModelMtx = glm::translate(glm::vec3(-0.5f, 0.0f, -1.0f)) *
 								glm::scale(glm::vec3(0.25f, 0.25f, 0.25f)) *
 								glm::rotate(glm::radians(-90.0f),
-			glm::vec3(1.0f, 0.0f, 0.0f));//model to world
+								glm::vec3(1.0f, 0.0f, 0.0f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
@@ -337,7 +340,7 @@ void Renderer::draw()
 	m_pShaderPT->activate();
 
 	//Shape-4|sphere|light source
-	shModelMtx = glm::translate(lightPos) * glm::scale(glm::vec3(0.0625f, 0.0625f, 0.0625f));//model to world
+	shModelMtx = glm::translate(m_pPointLight->getPosition()) * glm::scale(glm::vec3(0.0625f, 0.0625f, 0.0625f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
@@ -346,5 +349,4 @@ void Renderer::draw()
 	m_pMesh6->renderMesh();
 
 	GLCALL(glDisable(GL_DEPTH_TEST));
-	//std::cout << "chk4\n";
 }

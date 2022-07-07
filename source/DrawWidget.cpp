@@ -85,7 +85,8 @@ void DrawWidget::paintGL()
 	/* update timing */
 	QueryPerformanceCounter(&curTime);
 	QtImGui::newFrame();
-	ImGui::Text("Hello, world!");
+	//ImGui::Begin();
+	//ImGui::Text("Hello, world!");
 	//if (m_prevTime > 0)
 	{
 		double timeDelta = (double)(curTime.QuadPart - m_prevTime.QuadPart) / (double)m_freq.QuadPart;

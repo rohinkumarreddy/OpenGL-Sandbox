@@ -6,6 +6,7 @@ class Shader;
 class lightData;
 class Camera;
 class Texture;
+class PointLight;
 
 class Renderer
 {
@@ -27,6 +28,7 @@ private:
 	Shader* m_pTexShader;			//texture shader
 	Shader* m_pShaderPT;			//pass-through shader
 	lightData* m_pLightData;		//light data ptr
+	PointLight* m_pPointLight;		//point light
 	/* Mesh objects */
 	Mesh* m_pMesh1;
 	Mesh* m_pMesh2;
