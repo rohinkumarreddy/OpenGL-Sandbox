@@ -182,41 +182,41 @@
     <QtRcc Include="Sandbox.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="include\Camera.h" />
     <ClInclude Include="include\common.h" />
+    <ClInclude Include="include\DirectionalLight.h" />
+    <ClInclude Include="include\Light.h" />
     <ClInclude Include="include\lightData.h" />
     <ClInclude Include="include\Mesh.h" />
+    <ClInclude Include="include\PointLight.h" />
     <ClInclude Include="include\Renderer.h" />
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\ShapeData.h" />
     <ClInclude Include="include\ShapeGenerator.h" />
+    <ClInclude Include="include\SpotLight.h" />
     <ClInclude Include="include\TeapotData.h" />
     <ClInclude Include="include\Texture.h" />
     <ClInclude Include="include\Vertex.h" />
-    <ClInclude Include="Light.h" />
-    <ClInclude Include="PointLight.h" />
-    <ClInclude Include="SpotLight.h" />
     <ClInclude Include="vendor\qtimgui\QtImGui.h" />
     <QtMoc Include="vendor\qtimgui\ImGuiRenderer.h" />
     <QtMoc Include="include\SandboxMainWindow.h" />
     <QtMoc Include="include\DrawWidget.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DirectionalLight.cpp" />
-    <ClCompile Include="Light.cpp" />
-    <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\common.cpp" />
+    <ClCompile Include="source\DirectionalLight.cpp" />
     <ClCompile Include="source\DrawWidget.cpp" />
+    <ClCompile Include="source\Light.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
+    <ClCompile Include="source\PointLight.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\SandboxMainWindow.cpp" />
     <ClCompile Include="source\Shader.cpp" />
     <ClCompile Include="source\ShapeGenerator.cpp" />
+    <ClCompile Include="source\SpotLight.cpp" />
     <ClCompile Include="source\Texture.cpp" />
-    <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="vendor\qtimgui\ImGuiRenderer.cpp" />
     <ClCompile Include="vendor\qtimgui\QtImGui.cpp" />
   </ItemGroup>

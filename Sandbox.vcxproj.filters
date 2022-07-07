@@ -57,16 +57,16 @@
     <ClInclude Include="vendor\qtimgui\QtImGui.h">
       <Filter>vendor</Filter>
     </ClInclude>
-    <ClInclude Include="Light.h">
+    <ClInclude Include="include\SpotLight.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="DirectionalLight.h">
+    <ClInclude Include="include\DirectionalLight.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="PointLight.h">
+    <ClInclude Include="include\Light.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="SpotLight.h">
+    <ClInclude Include="include\PointLight.h">
       <Filter>Include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -118,16 +118,16 @@
     <ClCompile Include="vendor\qtimgui\QtImGui.cpp">
       <Filter>vendor</Filter>
     </ClCompile>
-    <ClCompile Include="Light.cpp">
+    <ClCompile Include="source\PointLight.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="DirectionalLight.cpp">
+    <ClCompile Include="source\Light.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="PointLight.cpp">
+    <ClCompile Include="source\SpotLight.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="SpotLight.cpp">
+    <ClCompile Include="source\DirectionalLight.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
