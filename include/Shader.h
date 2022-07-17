@@ -14,7 +14,10 @@ public:
 	bool build();
 	void activate();
 	void initUniforms(std::vector<std::string> uniformLst);
+	void addUniforms(std::vector<std::string> uniformLst);
 	template<class T> bool setUniform(std::string, T);
+	template<class T> bool addLightSource(T);
+	template<class T> bool updateLightParams(T);
 private:
 	std::string m_vSrc;
 	std::string m_fSrc;

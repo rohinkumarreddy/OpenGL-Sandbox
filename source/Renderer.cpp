@@ -12,6 +12,7 @@
 #include "ShapeGenerator.h"
 #include "lightData.h"
 #include "PointLight.h"
+#include "DirectionalLight.h"
 
 Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	:
@@ -34,8 +35,11 @@ Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	m_height(height),
 	m_PixRatio(pixelRatio),
 	m_pCamera(nullptr),
-	m_pPointLight(new PointLight())
+	m_pDirectionalLight(new DirectionalLight())
 {
+	m_PointLightVec.push_back(new PointLight());
+	m_PointLightVec.push_back(new PointLight());
+	m_PointLightVec.push_back(new PointLight());
 }
 
 Renderer::~Renderer()
@@ -95,9 +99,19 @@ Renderer::~Renderer()
 	m_pShaderPT = nullptr;
 
 	//Clean-up lights
-	if (m_pPointLight != nullptr)
-		delete m_pPointLight;
-	m_pPointLight = nullptr;
+	if (!m_PointLightVec.empty())
+	{
+		for each (auto var in m_PointLightVec)
+		{
+			if (var != nullptr)
+				delete var;
+			var = nullptr;
+		}
+		m_PointLightVec.clear();
+	}
+	if (m_pDirectionalLight != nullptr)
+		delete m_pDirectionalLight;
+	m_pDirectionalLight = nullptr;
 }
 
 void Renderer::initialize()
@@ -140,13 +154,22 @@ void Renderer::initialize()
 	m_pTexShader->activate();
 
 	/* Query uniform */
-	m_pTexShader->initUniforms(std::vector<std::string>{"u_MVPMtx",
-		"u_ambientLight",
-		"u_diffusedLight",
-		"u_lightPos",
+	m_pTexShader->initUniforms(std::vector<std::string>
+	{
+		"u_MVPMtx",
 		"u_eyePos",
 		"u_MWMtx",
-		"u_lAttenuationFac"});
+		"u_material.specularIntensity",
+		"u_material.shininess",
+		"u_pointLightCount"
+	});
+
+	/* Add light sources */
+	m_pTexShader->addLightSource(m_pDirectionalLight);
+	for each (auto var in m_PointLightVec)
+	{
+		m_pTexShader->addLightSource(var);
+	}
 
 	/* Select shader */
 	m_pShaderPT->activate();
@@ -237,44 +260,50 @@ void Renderer::draw()
 	glm::vec3 eyePos = m_pCamera->getPosition();//eye position|world space
 
 	//Ambient-light|Diffused-light
-	m_pPointLight->setIntensity(0.1f, 1.0f);
+	m_pDirectionalLight->setIntensity(0.15f, 0.15f);
+	m_pDirectionalLight->setColor(1.0f, 1.0f, 1.0f);
 
 	//Light-source
 	if (m_pLightData)
-		m_pPointLight->setPosition(m_pLightData->pos);
-
-	//Light attenuation(kC, kL, kQ)
-	if (m_pLightData)
-		m_pPointLight->setAttenuation(m_pLightData->attenuation);
+	{
+		glm::vec3 skylightDir = (m_pLightData->pos - glm::vec3(0.0f, 0.0f, 0.0f));
+		skylightDir /= skylightDir.length();
+		for each (auto var in m_PointLightVec)
+		{
+			var->setIntensity(0.55f, 0.55f);
+			var->setPosition(m_pLightData->pos.x + (pow(-1, var->getLightIndex()) * (var->getLightIndex()>0) * 9.0f),
+							 m_pLightData->pos.y,
+							 m_pLightData->pos.z + (pow(-1, var->getLightIndex()) * (var->getLightIndex()>0) * 9.0f));
+			//Light attenuation(kC, kL, kQ)
+			var->setAttenuation(m_pLightData->attenuation);
+			/*switch (var->getLightIndex())
+			{
+			case 1:
+				var->setColor(0, 1.0f, 0);
+				break;
+			case 2:
+				var->setColor(0, 0, 1.0f);
+				break;
+			case 0:default:
+				var->setColor(1.0f, 0, 0);
+				break;
+			}*/
+		}
+		m_pDirectionalLight->setDirection(skylightDir);//(glm::vec3(0.0f, 0.0f, -1.0f));
+	}
 
 	/* Select texture */
 	m_pTex1->activate();
 
-	///* Select shader */
-	//m_pShader->activate();
-
-	////Set Uniform
-	//m_pShader->setUniform("u_ambientLight", ambientLight);
-	//m_pShader->setUniform("u_eyePos", eyePos);
-	//m_pShader->setUniform("u_lightPos", lightPos);
-	//m_pShader->setUniform("u_lAttenuationFac", lightAttn);
-
-	//Shape-2|arrow-1
-	glm::mat4 shModelMtx = glm::translate(glm::vec3(1.0f, 0.0f, 0.25f)) *
-										  glm::scale(glm::vec3(0.25f, 0.25f, 0.25f));//model to world
-	//MVPMtx = VPMtx * shModelMtx;//model to projection
-
-	////Set Uniform
-	//m_pShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
-	//m_pShader->setUniform("u_MWMtx", shModelMtx);//model to world
-
-	//m_pMesh2->renderMesh();
-
 	/* Select shader program */
 	m_pTexShader->activate();
 
+	m_pTexShader->setUniform("u_pointLightCount", PointLight::getLightCount());
+	m_pTexShader->setUniform("u_material.specularIntensity", 1.0f);
+	m_pTexShader->setUniform("u_material.shininess", 50.0f);
+
 	//Shape-5|cube
-	shModelMtx = glm::translate(glm::vec3(0.5f, 0.25f, 1.0f)) *
+	glm::mat4 shModelMtx = glm::translate(glm::vec3(0.5f, 0.25f, 1.0f)) *
 								glm::scale(glm::vec3(0.25f, 0.25f, 0.25f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
@@ -283,7 +312,11 @@ void Renderer::draw()
 	m_pTexShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
 	//Set-up light
-	m_pPointLight->UseLight(m_pTexShader);
+	for each (auto var in m_PointLightVec)
+	{
+		var->UseLight(m_pTexShader);
+	}
+	m_pDirectionalLight->UseLight(m_pTexShader);
 
 	m_pTexMesh->renderMesh();
 
@@ -297,7 +330,7 @@ void Renderer::draw()
 	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
 	m_pMesh6->renderMesh();
-
+#if 0
 	//Shape-5|torus
 	shModelMtx = glm::translate(glm::vec3(0.0f, 0.15f, 0.0f)) *
 								glm::scale(glm::vec3(0.25f, 0.25f, 0.25f));//model to world
@@ -308,7 +341,7 @@ void Renderer::draw()
 	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
 	m_pMesh5->renderMesh();
-
+#endif
 	/* Select texture */
 	m_pTex2->activate();
 	//Shape-3|plane
@@ -335,18 +368,18 @@ void Renderer::draw()
 	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
 	m_pMesh1->renderMesh();
-
+#if 0
 	/* Select shader program */
 	m_pShaderPT->activate();
 
 	//Shape-4|sphere|light source
-	shModelMtx = glm::translate(m_pPointLight->getPosition()) * glm::scale(glm::vec3(0.0625f, 0.0625f, 0.0625f));//model to world
+	shModelMtx = glm::translate(m_PointLightVec[0]->getPosition()) * glm::scale(glm::vec3(0.0625f, 0.0625f, 0.0625f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
 	m_pShaderPT->setUniform("u_MVPMtx", MVPMtx);//model to projection
 
 	m_pMesh6->renderMesh();
-
+#endif
 	GLCALL(glDisable(GL_DEPTH_TEST));
 }

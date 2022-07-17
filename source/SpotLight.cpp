@@ -2,11 +2,14 @@
 #include "Shader.h"
 #include "common.h"
 
+int SpotLight::lightCount = 0;
+
 SpotLight::SpotLight() : PointLight()
 {
 	m_direction = glm::vec3(0.0f, -1.0f, 0.0f);
 	m_edge = 0.0f;
 	m_procEdge = cosf(glm::radians(m_edge));
+	lightCount++;
 }
 
 SpotLight::SpotLight(	GLfloat red, GLfloat green, GLfloat blue,
@@ -14,15 +17,16 @@ SpotLight::SpotLight(	GLfloat red, GLfloat green, GLfloat blue,
 						GLfloat xPos, GLfloat yPos, GLfloat zPos,
 						GLfloat xDir, GLfloat yDir, GLfloat zDir,
 						GLfloat con, GLfloat lin, GLfloat exp,
-						GLfloat edge	)
+						GLfloat cut, GLfloat edge	)
 	: PointLight(	red, green, blue,
 					aIntensity, dIntensity,
 					xPos, yPos, zPos,
-					con, lin, exp	)
+					con, lin, exp, cut	)
 {
 	m_direction = glm::normalize(glm::vec3(xDir, yDir, zDir));
 	m_edge = edge;
 	m_procEdge = cosf(glm::radians(m_edge));
+	lightCount++;
 }
 
 void SpotLight::UseLight(	GLuint ambientIntensityLocation,
@@ -63,7 +67,7 @@ void SpotLight::UseLight(Shader* p_shader)
 															m_exponent));
 		//p_shader->setUniform("u_lightDir", m_direction);
 		//p_shader->setUniform("u_lightEdge", m_procEdge);
-		Light::UseLight(p_shader);
+		//Light::UseLight(p_shader);
 	}
 }
 
@@ -75,4 +79,5 @@ void SpotLight::SetFlash(glm::vec3 pos, glm::vec3 dir)
 
 SpotLight::~SpotLight()
 {
+	lightCount--;
 }

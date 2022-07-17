@@ -13,7 +13,7 @@ public:
 				GLfloat xPos, GLfloat yPos, GLfloat zPos,
 				GLfloat xDir, GLfloat yDir, GLfloat zDir,
 				GLfloat con, GLfloat lin, GLfloat exp,
-				GLfloat edg	);
+				GLfloat cut, GLfloat edg	);
 
 	void UseLight(	GLuint ambientIntensityLocation,
 					GLuint ambientColourLocation,
@@ -30,6 +30,15 @@ public:
 	void SetFlash(glm::vec3 pos, glm::vec3 dir);
 
 	~SpotLight();
+
+private:
+	static int lightCount;
+
+public:
+	static int getLightCount()
+	{
+		return lightCount;
+	}
 
 private:
 	glm::vec3 m_direction;

@@ -4,6 +4,9 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/transform.hpp"
 
+#include "PointLight.h"
+#include "DirectionalLight.h"
+
 //#include <string>
 
 //read file contents
@@ -154,6 +157,16 @@ void Shader::initUniforms(std::vector<std::string> uniformLst)
 	}
 }
 
+void Shader::addUniforms(std::vector<std::string> uniformLst)
+{
+	for each (std::string var in uniformLst)
+	{
+		GLuint uniformLoc = 0;
+		GLCALL(uniformLoc = glGetUniformLocation(m_Program, var.c_str()));
+		m_uniformList[var] = uniformLoc;
+	}
+}
+
 template<class T> bool Shader::setUniform(std::string uniform, T val)
 {
 	if (m_uniformList.find(uniform) == m_uniformList.end())
@@ -163,7 +176,7 @@ template<class T> bool Shader::setUniform(std::string uniform, T val)
 	}
 	std::cerr << "[Warning]: Unsupported uniform type  var " << uniform << std::endl;
 	//GLCALL(glUniform3fv(m_uniformList[uniform], 1, &val[0]));
-	return true;
+	return false;
 }
 
 template<> bool Shader::setUniform<glm::vec3>(std::string uniform, glm::vec3 val)
@@ -198,6 +211,118 @@ template<> bool Shader::setUniform<glm::mat4>(std::string uniform, glm::mat4 val
 	GLCALL(glUniformMatrix4fv(m_uniformList[uniform], 1, GL_FALSE, &val[0][0]));
 	return true;
 }
+
+template<> bool Shader::setUniform<GLfloat>(std::string uniform, GLfloat val)
+{
+	if (m_uniformList.find(uniform) == m_uniformList.end())
+	{
+		std::cerr << "[Error]: Unable to find uniform " << uniform << std::endl;
+		return false;
+	}
+	GLCALL(glUniform1f(m_uniformList[uniform], val));
+	return true;
+}
+
+template<> bool Shader::setUniform<GLint>(std::string uniform, GLint val)
+{
+	if (m_uniformList.find(uniform) == m_uniformList.end())
+	{
+		std::cerr << "[Error]: Unable to find uniform " << uniform << std::endl;
+		return false;
+	}
+	GLCALL(glUniform1i(m_uniformList[uniform], val));
+	return true;
+}
+
+template<class T> bool Shader::addLightSource(T)
+{
+	std::cerr << "[Warning]: Unsupported light source type used " << std::endl;
+	return false;
+}
+
+template<> bool Shader::addLightSource<DirectionalLight*>(DirectionalLight* src)
+{
+	this->addUniforms(std::vector<std::string>
+	{
+		"u_directionalLight.direction",
+		"u_directionalLight.base.color",
+		"u_directionalLight.base.ambientIntensity",
+		"u_directionalLight.base.diffuseIntensity"
+	});
+	return true;
+}
+
+template<> bool Shader::addLightSource<PointLight*>(PointLight* src)
+{
+	int indx = src->getLightIndex();
+	this->addUniforms(std::vector<std::string>
+	{
+		"u_pointLights[" + std::to_string(indx) + "].position",
+		"u_pointLights[" + std::to_string(indx) + "].constant",
+		"u_pointLights[" + std::to_string(indx) + "].linear",
+		"u_pointLights[" + std::to_string(indx) + "].exponent",
+		"u_pointLights[" + std::to_string(indx) + "].base.color",
+		"u_pointLights[" + std::to_string(indx) + "].base.ambientIntensity",
+		"u_pointLights[" + std::to_string(indx) + "].base.diffuseIntensity"
+	});
+	return true;
+}
+
+template<class T> bool Shader::updateLightParams(T)
+{
+	std::cerr << "[Warning]: Unsupported light source type used " << std::endl;
+	return false;
+}
+
+template<> bool Shader::updateLightParams<DirectionalLight*>(DirectionalLight* src)
+{
+	setUniform("u_directionalLight.direction", src->getDirection());
+	setUniform("u_directionalLight.base.color", src->getColor());
+	setUniform("u_directionalLight.base.ambientIntensity", src->getAmbientIntensity());
+	setUniform("u_directionalLight.base.diffuseIntensity", src->getDiffusionIntensity());
+	return true;
+}
+
+template<> bool Shader::updateLightParams<PointLight*>(PointLight* src)
+{
+	int indx = src->getLightIndex();
+	setUniform("u_pointLights[" +
+		std::to_string(indx) +
+		"].position",
+		src->getPosition());
+
+	setUniform("u_pointLights[" +
+		std::to_string(indx) +
+		"].constant",
+		src->getConstant());
+
+	setUniform("u_pointLights[" +
+		std::to_string(indx) +
+		"].linear",
+		src->getLinear());
+
+	setUniform("u_pointLights[" +
+		std::to_string(indx) +
+		"].exponent",
+		src->getExponent());
+
+	setUniform("u_pointLights[" +
+		std::to_string(indx) +
+		"].base.color",
+		src->getColor());
+
+	setUniform("u_pointLights[" +
+		std::to_string(indx) +
+		"].base.ambientIntensity",
+		src->getAmbientIntensity());
+
+	setUniform("u_pointLights[" +
+		std::to_string(indx) +
+		"].base.diffuseIntensity",
+		src->getDiffusionIntensity());
+	return true;
+}
+
 /*GLCALL(m_u_MVPMtxLoc = glGetUniformLocation(m_Program, "u_MVPMtx"));
 GLCALL(m_u_ambientLightLoc = glGetUniformLocation(m_Program, "u_ambientLight"));
 GLCALL(m_u_lightPosLoc = glGetUniformLocation(m_Program, "u_lightPos"));

@@ -53,6 +53,6 @@ protected:
 	void UseLight(	GLuint ambientIntensityLocation,
 					GLuint ambientColourLocation,
 					GLuint diffuseIntensityLocation	);
-	void UseLight(Shader* p_shader);
+	//void UseLight(Shader* p_shader);
 };
 

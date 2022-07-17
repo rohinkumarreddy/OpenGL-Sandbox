@@ -25,20 +25,20 @@ void Light::UseLight(	GLuint ambientIntensityLocation,
 	GLCALL(glUniform1f(diffuseIntensityLocation, m_diffuseIntensity));
 }
 
-void Light::UseLight(Shader* p_shader)
-{
-	if (p_shader != nullptr)
-	{
-		p_shader->setUniform("u_ambientLight", glm::vec4(	m_ambientIntensity,
-															m_ambientIntensity,
-															m_ambientIntensity,
-															m_ambientIntensity	));
-		p_shader->setUniform("u_diffusedLight", glm::vec4(	m_diffuseIntensity,
-															m_diffuseIntensity,
-															m_diffuseIntensity,
-															m_diffuseIntensity	));
-	}
-}
+//void Light::UseLight(Shader* p_shader)
+//{
+//	if (p_shader != nullptr)
+//	{
+//		/*p_shader->setUniform("u_ambientLight", glm::vec4(	m_ambientIntensity,
+//															m_ambientIntensity,
+//															m_ambientIntensity,
+//															m_ambientIntensity	));
+//		p_shader->setUniform("u_diffusedLight", glm::vec4(	m_diffuseIntensity,
+//															m_diffuseIntensity,
+//															m_diffuseIntensity,
+//															m_diffuseIntensity	));*/
+//	}
+//}
 
 Light::~Light()
 {

@@ -1,5 +1,6 @@
 #include "SandboxMainWindow.h"
 #include <QtWidgets/QApplication>
+#include <windows.h>
 
 //#define RELEASE_DEBUG
 
@@ -10,14 +11,14 @@
 
 int main(int argc, char *argv[])
 {
-#ifndef NDEBUG
+//#ifndef NDEBUG
     FreeConsole();
     AllocConsole();
     //AttachConsole(GetCurrentProcessId());
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
     freopen("CON", "r", stdin);
-#endif
+//#endif
     QApplication a(argc, argv);
     SandboxMainWindow w;
     w.show();

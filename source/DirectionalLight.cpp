@@ -35,8 +35,8 @@ void DirectionalLight::UseLight(Shader* p_shader)
 {
 	if (p_shader != nullptr)
 	{
-		//p_shader->setUniform("u_lightDir", m_direction);
-		Light::UseLight(p_shader);
+		p_shader->updateLightParams(this);
+		//Light::UseLight(p_shader);
 	}
 }
 

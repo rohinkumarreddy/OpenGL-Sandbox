@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 //forward declaration
 class Mesh;
 class Shader;
@@ -7,6 +9,7 @@ class lightData;
 class Camera;
 class Texture;
 class PointLight;
+class DirectionalLight;
 
 class Renderer
 {
@@ -28,7 +31,8 @@ private:
 	Shader* m_pTexShader;			//texture shader
 	Shader* m_pShaderPT;			//pass-through shader
 	lightData* m_pLightData;		//light data ptr
-	PointLight* m_pPointLight;		//point light
+	std::vector<PointLight*> m_PointLightVec;		//point light
+	DirectionalLight* m_pDirectionalLight;		//directional light
 	/* Mesh objects */
 	Mesh* m_pMesh1;
 	Mesh* m_pMesh2;
