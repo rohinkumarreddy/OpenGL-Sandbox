@@ -18,7 +18,80 @@ Mesh::~Mesh()
 	clearMesh();
 }
 
-void Mesh::createMesh(Vertex* vertices, unsigned short* indices, unsigned int numOfVertices, unsigned int numOfIndices, bool hasTexture)
+void Mesh::createMesh(void* vertices,
+					  unsigned short* indices,
+					  unsigned int numOfVertices,
+					  unsigned int numOfIndices,
+					  MeshAttribute::MeshAttributeProfile attributeProfile)
+{
+	std::vector<MeshAttribute> attributes;
+	if(MeshAttribute::fillAttribListfromProfile(attributeProfile, attributes) == true)
+		createMesh(vertices, indices, numOfVertices, numOfIndices, attributes);
+}
+
+void Mesh::createMesh(void* vertices,
+					  unsigned short* indices,
+					  unsigned int numOfVertices,
+					  unsigned int numOfIndices,
+					  std::vector<MeshAttribute>& attributes)
+{
+	m_idxCnt = numOfIndices;
+
+	const size_t _VERTEX_BYTE_SIZE_ = MeshAttribute::computeVertexByteOffset(attributes);
+
+	/* Vertex array object */
+	GLCALL(glGenVertexArrays(1, &m_VAO));
+	GLCALL(glBindVertexArray(m_VAO));
+
+	/* Index buffer object */
+	GLCALL(glGenBuffers(1, &m_IBO));
+	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO));
+	GLCALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+						sizeof(indices[0]) * numOfIndices,
+						indices, GL_STATIC_DRAW));
+
+	/* Vertex buffer object */
+	GLCALL(glGenBuffers(1, &m_VBO));
+	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VBO));
+	GLCALL(glBufferData(GL_ARRAY_BUFFER,
+						_VERTEX_BYTE_SIZE_ * numOfVertices,
+						vertices, GL_STATIC_DRAW));
+
+	/* Vertex attributes */
+	{
+		size_t _ATTRIBUTE_OFFSET_ = 0;
+		int atrbId = 0;
+		for each (auto atrb in attributes)
+		{
+			GLCALL(glEnableVertexAttribArray(atrbId));
+			/*
+			* void glVertexAttribPointer(	GLuint index,
+											GLint size,
+											GLenum type,
+											GLboolean normalized,
+											GLsizei stride,
+											const GLvoid * pointer);
+			*/
+			GLCALL(glVertexAttribPointer(	atrbId,
+											atrb.count(),
+											atrb.GLtype(),//GL_FLOAT,
+											GL_FALSE,
+											_VERTEX_BYTE_SIZE_,
+											(const void*)_ATTRIBUTE_OFFSET_ ) );
+			_ATTRIBUTE_OFFSET_ += atrb.size();
+			atrbId++;
+		}
+	}
+
+	//Unbind Vertex array
+	GLCALL(glBindVertexArray(0));
+}
+
+void Mesh::createMesh(Vertex* vertices,
+					  unsigned short* indices,
+					  unsigned int numOfVertices,
+					  unsigned int numOfIndices,
+					  bool hasTexture)
 {
 	m_idxCnt = numOfIndices;
 
@@ -29,12 +102,16 @@ void Mesh::createMesh(Vertex* vertices, unsigned short* indices, unsigned int nu
 	/* Index buffer object */
 	GLCALL(glGenBuffers(1, &m_IBO));
 	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO));
-	GLCALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * numOfIndices, indices, GL_STATIC_DRAW));
+	GLCALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+						sizeof(indices[0]) * numOfIndices,
+						indices, GL_STATIC_DRAW));
 
 	/* Vertex buffer object */
 	GLCALL(glGenBuffers(1, &m_VBO));
 	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VBO));
-	GLCALL(glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * numOfVertices, vertices, GL_STATIC_DRAW));
+	GLCALL(glBufferData(GL_ARRAY_BUFFER,
+						sizeof(vertices[0]) * numOfVertices,
+						vertices, GL_STATIC_DRAW));
 
 	/* Vertex attributes */
 	GLCALL(glEnableVertexAttribArray(0));
@@ -45,34 +122,41 @@ void Mesh::createMesh(Vertex* vertices, unsigned short* indices, unsigned int nu
 		GLCALL(glEnableVertexAttribArray(3));
 
 		//attribute-0|position
-		GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE, 0));
+		GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT,
+									GL_FALSE, VERTEX_BYTE_SIZE, 0));
 		//4th element is by default 1.0f
 
 		//attribute-1|color
-		GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-			(const void*)(3 * sizeof(float))));
+		GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT,
+									GL_FALSE, VERTEX_BYTE_SIZE,
+									(const void*)(3 * sizeof(float))));
 
 		//attribute-2|texture coordinates
-		GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-			(const void*)(6 * sizeof(float))));
+		GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT,
+									GL_FALSE, VERTEX_BYTE_SIZE,
+									(const void*)(6 * sizeof(float))));
 
 		//attribute-3|normal
-		GLCALL(glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, VERTEX_BYTE_SIZE,
-			(const void*)(9 * sizeof(float))));
+		GLCALL(glVertexAttribPointer(3, 3, GL_FLOAT,
+									GL_FALSE, VERTEX_BYTE_SIZE,
+									(const void*)(9 * sizeof(float))));
 	}
 	else
 	{
 		//attribute-0|position
-		GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, NO_TEX_VERTEX_BYTE_SIZE, 0));
+		GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT,
+									GL_FALSE, NO_TEX_VERTEX_BYTE_SIZE, 0));
 		//4th element is by default 1.0f
 
 		//attribute-1|color
-		GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, NO_TEX_VERTEX_BYTE_SIZE,
-			(const void*)(3 * sizeof(float))));
+		GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT,
+									GL_FALSE, NO_TEX_VERTEX_BYTE_SIZE,
+									(const void*)(3 * sizeof(float))));
 
 		//attribute-2|normal
-		GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, NO_TEX_VERTEX_BYTE_SIZE,
-			(const void*)(6 * sizeof(float))));
+		GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT,
+									GL_FALSE, NO_TEX_VERTEX_BYTE_SIZE,
+									(const void*)(6 * sizeof(float))));
 	}
 	//Unbind Vertex array
 	GLCALL(glBindVertexArray(0));
@@ -85,7 +169,8 @@ void Mesh::renderMesh()
 	/* Bind IBO */
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO));
 	/* Draw Mesh */
-	GLCALL(glDrawElements(GL_TRIANGLES, m_idxCnt, GL_UNSIGNED_SHORT, 0));
+	GLCALL(glDrawElements(GL_TRIANGLES, m_idxCnt,
+						  GL_UNSIGNED_SHORT, 0));
 	/* Unbind IBO */
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 	/* Unbind VAO */

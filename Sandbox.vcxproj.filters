@@ -69,6 +69,9 @@
     <ClInclude Include="include\PointLight.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="include\MeshAttribute.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="include\DrawWidget.h">
@@ -128,6 +131,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="source\DirectionalLight.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\MeshAttribute.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

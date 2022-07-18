@@ -206,13 +206,20 @@ void Renderer::setupScene()
 	ShapeData texCube = ShapeGenerator::makeCube();
 
 	/* Create Meshes */
-	m_pMesh1->createMesh(teapot.vertices, teapot.indices, teapot.numVertices, teapot.numIndices);
+	m_pMesh1->createMesh(teapot.vertices, teapot.indices, teapot.numVertices, teapot.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
+	m_pMesh2->createMesh(arrow.vertices, arrow.indices, arrow.numVertices, arrow.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
+	m_pMesh3->createMesh(plane.vertices, plane.indices, plane.numVertices, plane.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
+	m_pMesh4->createMesh(cube.vertices, cube.indices, cube.numVertices, cube.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
+	m_pMesh5->createMesh(torus.vertices, torus.indices, torus.numVertices, torus.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
+	m_pMesh6->createMesh(sphere.vertices, sphere.indices, sphere.numVertices, sphere.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
+	m_pTexMesh->createMesh(texCube.vertices, texCube.indices, texCube.numVertices, texCube.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
+	/*m_pMesh1->createMesh(teapot.vertices, teapot.indices, teapot.numVertices, teapot.numIndices);
 	m_pMesh2->createMesh(arrow.vertices, arrow.indices, arrow.numVertices, arrow.numIndices);
 	m_pMesh3->createMesh(plane.vertices, plane.indices, plane.numVertices, plane.numIndices);
 	m_pMesh4->createMesh(cube.vertices, cube.indices, cube.numVertices, cube.numIndices);
 	m_pMesh5->createMesh(torus.vertices, torus.indices, torus.numVertices, torus.numIndices);
 	m_pMesh6->createMesh(sphere.vertices, sphere.indices, sphere.numVertices, sphere.numIndices);
-	m_pTexMesh->createMesh(texCube.vertices, texCube.indices, texCube.numVertices, texCube.numIndices);
+	m_pTexMesh->createMesh(texCube.vertices, texCube.indices, texCube.numVertices, texCube.numIndices);*/
 
 	/* Load Textures */
 	m_pTex1->loadTexture();

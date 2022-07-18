@@ -188,6 +188,7 @@
     <ClInclude Include="include\Light.h" />
     <ClInclude Include="include\lightData.h" />
     <ClInclude Include="include\Mesh.h" />
+    <ClInclude Include="include\MeshAttribute.h" />
     <ClInclude Include="include\PointLight.h" />
     <ClInclude Include="include\Renderer.h" />
     <ClInclude Include="include\Shader.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="source\Light.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
+    <ClCompile Include="source\MeshAttribute.cpp" />
     <ClCompile Include="source\PointLight.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\SandboxMainWindow.cpp" />

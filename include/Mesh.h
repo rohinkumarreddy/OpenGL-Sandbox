@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vector>
+#include "MeshAttribute.h"
+
 //forward declaration
 struct Vertex;
 
@@ -13,6 +16,21 @@ public:
 					unsigned int numOfVertices,
 					unsigned int numOfIndices,
 					bool hasTexture = true);
+	void createMesh(void* vertices,
+					unsigned short* indices,
+					unsigned int numOfVertices,
+					unsigned int numOfIndices,
+					std::vector<MeshAttribute>& attributes);
+	void createMesh(void* vertices,
+					unsigned short* indices,
+					unsigned int numOfVertices,
+					unsigned int numOfIndices,
+					MeshAttribute::MeshAttributeProfile attributeProfile);
+	/*void createMesh(Vertex* vertices,
+					unsigned short* indices,
+					unsigned int numOfVertices,
+					unsigned int numOfIndices,
+					std::vector<MeshAttribute>& attributes);*/
 	void renderMesh();
 	void clearMesh();
 
