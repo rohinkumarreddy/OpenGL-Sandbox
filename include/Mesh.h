@@ -9,8 +9,18 @@ struct Vertex;
 class Mesh
 {
 public:
+	enum class shapeType
+	{
+		_TEAPOT_ = 0,
+		_ARROW_,
+		_PLANE_,
+		_CUBE_,
+		_TORUS_,
+		_SPHERE_
+	};
 	Mesh();
-
+	~Mesh();
+	void createMesh(shapeType type);
 	void createMesh(Vertex* vertices,
 					unsigned short* indices,
 					unsigned int numOfVertices,
@@ -33,8 +43,6 @@ public:
 					std::vector<MeshAttribute>& attributes);*/
 	void renderMesh();
 	void clearMesh();
-
-	~Mesh();
 
 private:
 	unsigned int m_VAO, m_VBO, m_IBO;

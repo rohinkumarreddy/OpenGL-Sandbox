@@ -2,6 +2,7 @@
 #include <GL\glew.h>
 #include "common.h"
 #include "Vertex.h"
+#include "ShapeGenerator.h"
 
 Mesh::Mesh()
 	:
@@ -16,6 +17,43 @@ Mesh::~Mesh()
 {
 	/* GLCALL results in error here */
 	clearMesh();
+}
+
+void Mesh::createMesh(shapeType type)
+{
+	/* Shape object */
+	ShapeData shape;
+	/* Choose shape */
+	switch (type)
+	{
+	case shapeType::_TEAPOT_:
+		shape = ShapeGenerator::makeTeapot();
+		break;
+	case shapeType::_ARROW_:
+		shape = ShapeGenerator::makeArrow();
+		break;
+	case shapeType::_PLANE_:
+		shape = ShapeGenerator::makePlane(100, 2);
+		break;
+	case shapeType::_CUBE_:
+		shape = ShapeGenerator::makeCube();
+		break;
+	case shapeType::_TORUS_:
+		shape = ShapeGenerator::makeTorus(50);
+		break;
+	case shapeType::_SPHERE_:
+	default:
+		shape = ShapeGenerator::makeSphere(50);
+		break;
+	}
+	/* Create mesh */
+	createMesh(	shape.vertices,
+				shape.indices,
+				shape.numVertices,
+				shape.numIndices,
+				MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
+	/* Clean up */
+	shape.cleanUp();
 }
 
 void Mesh::createMesh(void* vertices,
@@ -160,6 +198,13 @@ void Mesh::createMesh(Vertex* vertices,
 	}
 	//Unbind Vertex array
 	GLCALL(glBindVertexArray(0));
+
+	/*
+	* Attribute data can also be sent to shader
+	* using glVertexAttrib3f(attribId, <data>)
+	* without enabling the corresponding attrib-Array.
+	* Note: can be used to switch from solid color & dynamic color etc.
+	*/
 }
 
 void Mesh::renderMesh()

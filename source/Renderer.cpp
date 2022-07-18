@@ -9,7 +9,6 @@
 #include "Texture.h"
 #include "Shader.h"
 #include "Camera.h"
-#include "ShapeGenerator.h"
 #include "lightData.h"
 #include "PointLight.h"
 #include "DirectionalLight.h"
@@ -196,51 +195,19 @@ void Renderer::installShader()
 
 void Renderer::setupScene()
 {
-	/* Shape Object */
-	ShapeData teapot = ShapeGenerator::makeTeapot();
-	ShapeData arrow = ShapeGenerator::makeArrow();
-	ShapeData plane = ShapeGenerator::makePlane(100,2);
-	ShapeData cube = ShapeGenerator::makeCube();
-	ShapeData torus = ShapeGenerator::makeTorus(50);
-	ShapeData sphere = ShapeGenerator::makeSphere(50);
-	ShapeData texCube = ShapeGenerator::makeCube();
-
 	/* Create Meshes */
-	m_pMesh1->createMesh(teapot.vertices, teapot.indices, teapot.numVertices, teapot.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
-	m_pMesh2->createMesh(arrow.vertices, arrow.indices, arrow.numVertices, arrow.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
-	m_pMesh3->createMesh(plane.vertices, plane.indices, plane.numVertices, plane.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
-	m_pMesh4->createMesh(cube.vertices, cube.indices, cube.numVertices, cube.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
-	m_pMesh5->createMesh(torus.vertices, torus.indices, torus.numVertices, torus.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
-	m_pMesh6->createMesh(sphere.vertices, sphere.indices, sphere.numVertices, sphere.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
-	m_pTexMesh->createMesh(texCube.vertices, texCube.indices, texCube.numVertices, texCube.numIndices, MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
-	/*m_pMesh1->createMesh(teapot.vertices, teapot.indices, teapot.numVertices, teapot.numIndices);
-	m_pMesh2->createMesh(arrow.vertices, arrow.indices, arrow.numVertices, arrow.numIndices);
-	m_pMesh3->createMesh(plane.vertices, plane.indices, plane.numVertices, plane.numIndices);
-	m_pMesh4->createMesh(cube.vertices, cube.indices, cube.numVertices, cube.numIndices);
-	m_pMesh5->createMesh(torus.vertices, torus.indices, torus.numVertices, torus.numIndices);
-	m_pMesh6->createMesh(sphere.vertices, sphere.indices, sphere.numVertices, sphere.numIndices);
-	m_pTexMesh->createMesh(texCube.vertices, texCube.indices, texCube.numVertices, texCube.numIndices);*/
+	m_pMesh1->createMesh(Mesh::shapeType::_TEAPOT_);
+	m_pMesh2->createMesh(Mesh::shapeType::_ARROW_);
+	m_pMesh3->createMesh(Mesh::shapeType::_PLANE_);
+	m_pMesh4->createMesh(Mesh::shapeType::_CUBE_);
+	m_pMesh5->createMesh(Mesh::shapeType::_TORUS_);
+	m_pMesh6->createMesh(Mesh::shapeType::_SPHERE_);
+	m_pTexMesh->createMesh(Mesh::shapeType::_CUBE_);
 
 	/* Load Textures */
 	m_pTex1->loadTexture();
 	m_pTex2->loadTexture();
 	m_pTex3->loadTexture();
-
-	/* Clean up */
-	teapot.cleanUp();
-	arrow.cleanUp();
-	plane.cleanUp();
-	cube.cleanUp();
-	torus.cleanUp();
-	sphere.cleanUp();
-	texCube.cleanUp();
-
-	/*
-	* Attribute data can also be sent to shader
-	* using glVertexAttrib3f(attribId, <data>)
-	* without enabling the corresponding attrib-Array.
-	* Note: can be used to switch from solid color & dynamic color etc.
-	*/
 }
 
 void Renderer::draw()
