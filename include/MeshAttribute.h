@@ -37,6 +37,9 @@ public:
 	MeshAttribute();
 
 	MeshAttribute(MeshDataType type, int count = 1);
+	void init(int id,
+			  const int _VERTEX_BYTE_SIZE_,
+			  const int _ATTRIBUTE_OFFSET_);
 
 	const int GLtype() { return (int)m_dataType; }
 	inline const MeshDataType type() { return m_dataType; }

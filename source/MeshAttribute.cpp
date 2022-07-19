@@ -1,4 +1,5 @@
 #include "MeshAttribute.h"
+#include "common.h"
 
 bool MeshAttribute::fillAttribListfromProfile(	MeshAttributeProfile& profile,
 												std::vector<MeshAttribute>& attributes)
@@ -93,4 +94,25 @@ MeshAttribute::MeshAttribute(MeshDataType type, int count)
 	m_dataType = type;
 	m_count = count;
 	m_size = computeAttributeByteOffset(*this);
+}
+
+void MeshAttribute::init(int id,
+						 const int _VERTEX_BYTE_SIZE_,
+						 const int _ATTRIBUTE_OFFSET_)
+{
+	GLCALL(glEnableVertexAttribArray(id));
+	/*
+	* void glVertexAttribPointer(	GLuint index,
+									GLint size,
+									GLenum type,
+									GLboolean normalized,
+									GLsizei stride,
+									const GLvoid * pointer);
+	*/
+	GLCALL(glVertexAttribPointer(	id,
+									m_count,
+									(int)m_dataType,//GL_FLOAT,
+									GL_FALSE,
+									_VERTEX_BYTE_SIZE_,
+									(const void*)_ATTRIBUTE_OFFSET_ ) );
 }

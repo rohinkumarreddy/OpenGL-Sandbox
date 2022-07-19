@@ -101,21 +101,7 @@ void Mesh::createMesh(void* vertices,
 		int atrbId = 0;
 		for each (auto atrb in attributes)
 		{
-			GLCALL(glEnableVertexAttribArray(atrbId));
-			/*
-			* void glVertexAttribPointer(	GLuint index,
-											GLint size,
-											GLenum type,
-											GLboolean normalized,
-											GLsizei stride,
-											const GLvoid * pointer);
-			*/
-			GLCALL(glVertexAttribPointer(	atrbId,
-											atrb.count(),
-											atrb.GLtype(),//GL_FLOAT,
-											GL_FALSE,
-											_VERTEX_BYTE_SIZE_,
-											(const void*)_ATTRIBUTE_OFFSET_ ) );
+			atrb.init(atrbId, _VERTEX_BYTE_SIZE_, _ATTRIBUTE_OFFSET_);
 			_ATTRIBUTE_OFFSET_ += atrb.size();
 			atrbId++;
 		}
