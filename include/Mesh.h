@@ -1,10 +1,13 @@
 #pragma once
 
 #include <vector>
-#include "MeshAttribute.h"
+#include "VertexAttribute.h"
 
 //forward declaration
 struct Vertex;
+class VertexArray;
+class VertexBuffer;
+class IndexBuffer;
 
 class Mesh
 {
@@ -21,21 +24,23 @@ public:
 	Mesh();
 	~Mesh();
 	void createMesh(shapeType type);
+#if 0
 	void createMesh(Vertex* vertices,
 					unsigned short* indices,
 					unsigned int numOfVertices,
 					unsigned int numOfIndices,
 					bool hasTexture = true);
+#endif
 	void createMesh(void* vertices,
 					unsigned short* indices,
 					unsigned int numOfVertices,
 					unsigned int numOfIndices,
-					std::vector<MeshAttribute>& attributes);
+					std::vector<VertexAttribute>& attributes);
 	void createMesh(void* vertices,
 					unsigned short* indices,
 					unsigned int numOfVertices,
 					unsigned int numOfIndices,
-					MeshAttribute::MeshAttributeProfile attributeProfile);
+					VertexAttribute::VertexAttributeProfile attributeProfile);
 	/*void createMesh(Vertex* vertices,
 					unsigned short* indices,
 					unsigned int numOfVertices,
@@ -45,7 +50,9 @@ public:
 	void clearMesh();
 
 private:
-	unsigned int m_VAO, m_VBO, m_IBO;
+	VertexArray* m_pVAO;
+	VertexBuffer* m_pVBO;
+	IndexBuffer* m_pIBO;
 	int m_idxCnt;
 
 };

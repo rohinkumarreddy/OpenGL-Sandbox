@@ -69,7 +69,16 @@
     <ClInclude Include="include\PointLight.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\MeshAttribute.h">
+    <ClInclude Include="include\VertexBuffer.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IndexBuffer.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VertexArray.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\VertexAttribute.h">
       <Filter>Include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -133,7 +142,16 @@
     <ClCompile Include="source\DirectionalLight.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\MeshAttribute.cpp">
+    <ClCompile Include="source\VertexBuffer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\IndexBuffer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\VertexArray.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\VertexAttribute.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

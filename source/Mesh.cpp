@@ -3,12 +3,14 @@
 #include "common.h"
 #include "Vertex.h"
 #include "ShapeGenerator.h"
+#include "VertexArray.h"
+#include "IndexBuffer.h"
 
 Mesh::Mesh()
 	:
-	m_VAO(0),
-	m_VBO(0),
-	m_IBO(0),
+	m_pVAO(nullptr),
+	m_pVBO(nullptr),
+	m_pIBO(nullptr),
 	m_idxCnt(0)
 {
 }
@@ -51,7 +53,7 @@ void Mesh::createMesh(shapeType type)
 				shape.indices,
 				shape.numVertices,
 				shape.numIndices,
-				MeshAttribute::MeshAttributeProfile::POS_COL_TEX_NOR);
+				VertexAttribute::VertexAttributeProfile::POS_COL_TEX_NOR);
 	/* Clean up */
 	shape.cleanUp();
 }
@@ -60,10 +62,10 @@ void Mesh::createMesh(void* vertices,
 					  unsigned short* indices,
 					  unsigned int numOfVertices,
 					  unsigned int numOfIndices,
-					  MeshAttribute::MeshAttributeProfile attributeProfile)
+					  VertexAttribute::VertexAttributeProfile attributeProfile)
 {
-	std::vector<MeshAttribute> attributes;
-	if(MeshAttribute::fillAttribListfromProfile(attributeProfile, attributes) == true)
+	std::vector<VertexAttribute> attributes;
+	if(VertexAttribute::fillAttribListfromProfile(attributeProfile, attributes) == true)
 		createMesh(vertices, indices, numOfVertices, numOfIndices, attributes);
 }
 
@@ -71,46 +73,33 @@ void Mesh::createMesh(void* vertices,
 					  unsigned short* indices,
 					  unsigned int numOfVertices,
 					  unsigned int numOfIndices,
-					  std::vector<MeshAttribute>& attributes)
+					  std::vector<VertexAttribute>& attributes)
 {
 	m_idxCnt = numOfIndices;
 
-	const size_t _VERTEX_BYTE_SIZE_ = MeshAttribute::computeVertexByteOffset(attributes);
+	const size_t _VERTEX_BYTE_SIZE_ = VertexAttribute::computeVertexByteOffset(attributes);
 
 	/* Vertex array object */
-	GLCALL(glGenVertexArrays(1, &m_VAO));
-	GLCALL(glBindVertexArray(m_VAO));
+	m_pVAO = new VertexArray();
 
 	/* Index buffer object */
-	GLCALL(glGenBuffers(1, &m_IBO));
-	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO));
-	GLCALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-						sizeof(indices[0]) * numOfIndices,
-						indices, GL_STATIC_DRAW));
+	m_pIBO = new IndexBuffer(indices, numOfIndices);
 
 	/* Vertex buffer object */
-	GLCALL(glGenBuffers(1, &m_VBO));
-	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VBO));
-	GLCALL(glBufferData(GL_ARRAY_BUFFER,
-						_VERTEX_BYTE_SIZE_ * numOfVertices,
-						vertices, GL_STATIC_DRAW));
+	m_pVBO = new VertexBuffer(vertices, _VERTEX_BYTE_SIZE_ * numOfVertices);
+
+	m_pVAO->Bind();
+	m_pIBO->Bind();
+	m_pVBO->Bind();
 
 	/* Vertex attributes */
-	{
-		size_t _ATTRIBUTE_OFFSET_ = 0;
-		int atrbId = 0;
-		for each (auto atrb in attributes)
-		{
-			atrb.init(atrbId, _VERTEX_BYTE_SIZE_, _ATTRIBUTE_OFFSET_);
-			_ATTRIBUTE_OFFSET_ += atrb.size();
-			atrbId++;
-		}
-	}
+	m_pVAO->AddBuffer(*m_pVBO, attributes);
 
 	//Unbind Vertex array
-	GLCALL(glBindVertexArray(0));
+	m_pVAO->UnBind();
 }
 
+#if 0
 void Mesh::createMesh(Vertex* vertices,
 					  unsigned short* indices,
 					  unsigned int numOfVertices,
@@ -120,22 +109,13 @@ void Mesh::createMesh(Vertex* vertices,
 	m_idxCnt = numOfIndices;
 
 	/* Vertex array object */
-	GLCALL(glGenVertexArrays(1, &m_VAO));
-	GLCALL(glBindVertexArray(m_VAO));
+	m_pVAO = new VertexArray();
 
 	/* Index buffer object */
-	GLCALL(glGenBuffers(1, &m_IBO));
-	GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO));
-	GLCALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-						sizeof(indices[0]) * numOfIndices,
-						indices, GL_STATIC_DRAW));
+	m_pIBO = new IndexBuffer(indices, numOfIndices);
 
 	/* Vertex buffer object */
-	GLCALL(glGenBuffers(1, &m_VBO));
-	GLCALL(glBindBuffer(GL_ARRAY_BUFFER, m_VBO));
-	GLCALL(glBufferData(GL_ARRAY_BUFFER,
-						sizeof(vertices[0]) * numOfVertices,
-						vertices, GL_STATIC_DRAW));
+	m_pVBO = new VertexBuffer(vertices, sizeof(vertices[0]) * numOfVertices);
 
 	/* Vertex attributes */
 	GLCALL(glEnableVertexAttribArray(0));
@@ -192,11 +172,12 @@ void Mesh::createMesh(Vertex* vertices,
 	* Note: can be used to switch from solid color & dynamic color etc.
 	*/
 }
+#endif
 
 void Mesh::renderMesh()
 {
 	/* Bind VAO */
-	GLCALL(glBindVertexArray(m_VAO));
+	m_pVAO->Bind();
 	/* Bind IBO */
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO));
 	/* Draw Mesh */
@@ -205,27 +186,28 @@ void Mesh::renderMesh()
 	/* Unbind IBO */
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 	/* Unbind VAO */
-	GLCALL(glBindVertexArray(0));
+	m_pVAO->UnBind();
 }
 
 void Mesh::clearMesh()
 {
-	if (m_IBO != 0)
+	//UnBind causes error here
+	if (m_pIBO != nullptr)
 	{
-		glDeleteBuffers(1, &m_IBO);
-		m_IBO = 0;
+		delete m_pIBO;
+		m_pIBO = nullptr;
 	}
 
-	if (m_VBO != 0)
+	if (m_pVBO != nullptr)
 	{
-		glDeleteBuffers(1, &m_VBO);
-		m_VBO = 0;
+		delete m_pVBO;
+		m_pVBO = nullptr;
 	}
 
-	if (m_VAO != 0)
+	if (m_pVAO != nullptr)
 	{
-		glDeleteVertexArrays(1, &m_VAO);
-		m_VAO = 0;
+		delete m_pVAO;
+		m_pVAO = nullptr;
 	}
 
 	m_idxCnt = 0;
