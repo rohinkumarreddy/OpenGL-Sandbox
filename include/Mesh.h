@@ -24,13 +24,11 @@ public:
 	Mesh();
 	~Mesh();
 	void createMesh(shapeType type);
-#if 0
 	void createMesh(Vertex* vertices,
 					unsigned short* indices,
 					unsigned int numOfVertices,
 					unsigned int numOfIndices,
 					bool hasTexture = true);
-#endif
 	void createMesh(void* vertices,
 					unsigned short* indices,
 					unsigned int numOfVertices,
@@ -41,11 +39,6 @@ public:
 					unsigned int numOfVertices,
 					unsigned int numOfIndices,
 					VertexAttribute::VertexAttributeProfile attributeProfile);
-	/*void createMesh(Vertex* vertices,
-					unsigned short* indices,
-					unsigned int numOfVertices,
-					unsigned int numOfIndices,
-					std::vector<MeshAttribute>& attributes);*/
 	void renderMesh();
 	void clearMesh();
 

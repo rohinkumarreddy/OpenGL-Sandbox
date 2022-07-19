@@ -11,10 +11,10 @@ public:
 	VertexArray();
 	~VertexArray();
 
-	void AddBuffer(const VertexBuffer& vb, const std::vector<VertexAttribute>& attributes);
+	void addBuffer(const VertexBuffer& vb, const std::vector<VertexAttribute>& attributes);
 
-	void Bind() const;
-	void UnBind() const;
+	void bind() const;
+	void unBind() const;
 
 private:
 	unsigned int m_Id;

@@ -13,11 +13,11 @@ VertexArray::~VertexArray()
 	glDeleteVertexArrays(1, &m_Id);
 }
 
-void VertexArray::AddBuffer(const VertexBuffer& vb,
+void VertexArray::addBuffer(const VertexBuffer& vb,
 							const std::vector<VertexAttribute>& attributes)
 {
-	Bind();
-	vb.Bind();
+	bind();
+	vb.bind();
 
 	const size_t _VERTEX_BYTE_SIZE_ = VertexAttribute::computeVertexByteOffset(attributes);
 
@@ -34,12 +34,12 @@ void VertexArray::AddBuffer(const VertexBuffer& vb,
 	}
 }
 
-void VertexArray::Bind() const
+void VertexArray::bind() const
 {
 	GLCALL(glBindVertexArray(m_Id));
 }
 
-void VertexArray::UnBind() const
+void VertexArray::unBind() const
 {
 	GLCALL(glBindVertexArray(0));
 }

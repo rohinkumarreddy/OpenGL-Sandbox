@@ -14,11 +14,11 @@ bool GLLogCall(const char* function, const char* file, int line);
         x;\
         ASSERT(GLLogCall(#x, __FILE__, __LINE__))
 
-#define X_DELTA 0.1f
-#define MAX_TRIS 20
+//#define X_DELTA 0.1f
+//#define MAX_TRIS 20
 
-const unsigned int NUM_VERTICES_PER_TRI = 3;
-const unsigned int NUM_FLOATS_PER_VTX = 12;
-const unsigned int VERTEX_BYTE_SIZE = NUM_FLOATS_PER_VTX * sizeof(float);
-const unsigned int NO_TEX_VERTEX_BYTE_SIZE = (NUM_FLOATS_PER_VTX-3) * sizeof(float);//remove 3 values per vertex for lack of texture (U,V,0)
-const unsigned int TRIANGLE_BYTE_SIZE = NUM_VERTICES_PER_TRI * NUM_FLOATS_PER_VTX * sizeof(float);
+//const unsigned int NUM_VERTICES_PER_TRI = 3;
+//const unsigned int NUM_FLOATS_PER_VTX = 12;
+//const unsigned int VERTEX_BYTE_SIZE = NUM_FLOATS_PER_VTX * sizeof(float);
+//const unsigned int NO_TEX_VERTEX_BYTE_SIZE = (NUM_FLOATS_PER_VTX-3) * sizeof(float);//remove 3 values per vertex for lack of texture (U,V,0)
+//const unsigned int TRIANGLE_BYTE_SIZE = NUM_VERTICES_PER_TRI * NUM_FLOATS_PER_VTX * sizeof(float);

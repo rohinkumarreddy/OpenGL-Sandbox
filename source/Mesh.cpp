@@ -88,82 +88,35 @@ void Mesh::createMesh(void* vertices,
 	/* Vertex buffer object */
 	m_pVBO = new VertexBuffer(vertices, _VERTEX_BYTE_SIZE_ * numOfVertices);
 
-	m_pVAO->Bind();
-	m_pIBO->Bind();
-	m_pVBO->Bind();
+	m_pVAO->bind();
+	m_pIBO->bind();
+	m_pVBO->bind();
 
 	/* Vertex attributes */
-	m_pVAO->AddBuffer(*m_pVBO, attributes);
+	m_pVAO->addBuffer(*m_pVBO, attributes);
 
 	//Unbind Vertex array
-	m_pVAO->UnBind();
+	m_pVAO->unBind();
 }
 
-#if 0
 void Mesh::createMesh(Vertex* vertices,
 					  unsigned short* indices,
 					  unsigned int numOfVertices,
 					  unsigned int numOfIndices,
 					  bool hasTexture)
 {
-	m_idxCnt = numOfIndices;
-
-	/* Vertex array object */
-	m_pVAO = new VertexArray();
-
-	/* Index buffer object */
-	m_pIBO = new IndexBuffer(indices, numOfIndices);
-
-	/* Vertex buffer object */
-	m_pVBO = new VertexBuffer(vertices, sizeof(vertices[0]) * numOfVertices);
-
-	/* Vertex attributes */
-	GLCALL(glEnableVertexAttribArray(0));
-	GLCALL(glEnableVertexAttribArray(1));
-	GLCALL(glEnableVertexAttribArray(2));
+	std::vector<VertexAttribute> attributes;
+	VertexAttribute::VertexAttributeProfile profile;
 	if (hasTexture)
 	{
-		GLCALL(glEnableVertexAttribArray(3));
-
-		//attribute-0|position
-		GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT,
-									GL_FALSE, VERTEX_BYTE_SIZE, 0));
-		//4th element is by default 1.0f
-
-		//attribute-1|color
-		GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT,
-									GL_FALSE, VERTEX_BYTE_SIZE,
-									(const void*)(3 * sizeof(float))));
-
-		//attribute-2|texture coordinates
-		GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT,
-									GL_FALSE, VERTEX_BYTE_SIZE,
-									(const void*)(6 * sizeof(float))));
-
-		//attribute-3|normal
-		GLCALL(glVertexAttribPointer(3, 3, GL_FLOAT,
-									GL_FALSE, VERTEX_BYTE_SIZE,
-									(const void*)(9 * sizeof(float))));
+		profile = VertexAttribute::VertexAttributeProfile::POS_COL_TEX_NOR;
 	}
 	else
 	{
-		//attribute-0|position
-		GLCALL(glVertexAttribPointer(0, 3, GL_FLOAT,
-									GL_FALSE, NO_TEX_VERTEX_BYTE_SIZE, 0));
-		//4th element is by default 1.0f
-
-		//attribute-1|color
-		GLCALL(glVertexAttribPointer(1, 3, GL_FLOAT,
-									GL_FALSE, NO_TEX_VERTEX_BYTE_SIZE,
-									(const void*)(3 * sizeof(float))));
-
-		//attribute-2|normal
-		GLCALL(glVertexAttribPointer(2, 3, GL_FLOAT,
-									GL_FALSE, NO_TEX_VERTEX_BYTE_SIZE,
-									(const void*)(6 * sizeof(float))));
+		profile = VertexAttribute::VertexAttributeProfile::POS_COL_NOR;
 	}
-	//Unbind Vertex array
-	GLCALL(glBindVertexArray(0));
+	if (VertexAttribute::fillAttribListfromProfile(profile, attributes) == true)
+		createMesh(vertices, indices, numOfVertices, numOfIndices, attributes);
 
 	/*
 	* Attribute data can also be sent to shader
@@ -172,12 +125,11 @@ void Mesh::createMesh(Vertex* vertices,
 	* Note: can be used to switch from solid color & dynamic color etc.
 	*/
 }
-#endif
 
 void Mesh::renderMesh()
 {
 	/* Bind VAO */
-	m_pVAO->Bind();
+	m_pVAO->bind();
 	/* Bind IBO */
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_IBO));
 	/* Draw Mesh */
@@ -186,7 +138,7 @@ void Mesh::renderMesh()
 	/* Unbind IBO */
 	//GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 	/* Unbind VAO */
-	m_pVAO->UnBind();
+	m_pVAO->unBind();
 }
 
 void Mesh::clearMesh()

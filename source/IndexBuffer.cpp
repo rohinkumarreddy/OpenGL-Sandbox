@@ -21,12 +21,12 @@ IndexBuffer::~IndexBuffer()
     m_Id = 0;
 }
 
-void IndexBuffer::Bind() const
+void IndexBuffer::bind() const
 {
     GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_Id));
 }
 
-void IndexBuffer::UnBind() const
+void IndexBuffer::unBind() const
 {
     GLCALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
