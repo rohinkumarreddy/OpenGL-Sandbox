@@ -296,7 +296,7 @@ void Renderer::draw()
 	if (!m_spotLightVec.empty() && m_pCamera != nullptr)
 	{
 		m_spotLightVec[0]->SetFlash(m_pCamera->getPosition(),
-									m_pCamera->getViewDirection());
+									-m_pCamera->getViewDirection());
 	}
 
 	/* Select texture */

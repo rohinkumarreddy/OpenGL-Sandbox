@@ -100,9 +100,11 @@ uniform Material u_material;	//Material description
 vec4 CalcLightByDirection(Light light, vec3 direction)
 {
 	vec4 ambientColor = vec4(light.color, 1.0f) * light.ambientIntensity;
+	ambientColor = clamp(ambientColor, 0, 1);
 	
-	float diffuseFactor = max(dot(normalize(p_normal), normalize(direction)), 0.0f);
+	float diffuseFactor = max(dot(normalize(p_normal), normalize(-direction)), 0.0f);
 	vec4 diffuseColor = vec4(light.color * light.diffuseIntensity * diffuseFactor, 1.0f);
+	diffuseColor = clamp(diffuseColor, 0, 1);
 	
 	vec4 specularColor = vec4(0, 0, 0, 0);
 	
@@ -111,13 +113,14 @@ vec4 CalcLightByDirection(Light light, vec3 direction)
 		vec3 fragToEye = normalize(u_eyePos - p_pos);
 		vec3 reflectedVertex = normalize(reflect(direction, normalize(p_normal)));
 		
-		float specularFactor = dot(fragToEye, reflectedVertex);
+		float specularFactor = clamp(dot(fragToEye, reflectedVertex), 0, 1);
 		if(specularFactor > 0.0f)
 		{
 			specularFactor = pow(specularFactor, u_material.shininess);
 			specularColor = vec4(light.color *
 								  u_material.specularIntensity *
 								  specularFactor, 1.0f);
+			specularColor = clamp(specularColor, 0, 1);
 		}
 	}
 
@@ -127,7 +130,7 @@ vec4 CalcLightByDirection(Light light, vec3 direction)
 vec4 CalcDirectionalLight()
 {
 	return CalcLightByDirection(u_directionalLight.base,
-								u_directionalLight.direction);
+								-u_directionalLight.direction);
 }
 
 vec4 CalcPointLight(PointLight pLight)
@@ -147,7 +150,7 @@ vec4 CalcPointLight(PointLight pLight)
 vec4 CalcSpotLight(SpotLight sLight)
 {
 	vec3 rayDirection = normalize(p_pos - sLight.base.position);
-	float slFactor = dot(rayDirection, normalize(sLight.direction));
+	float slFactor = dot(rayDirection, normalize(-sLight.direction));
 	
 	if(slFactor > sLight.edge)
 	{
@@ -204,7 +207,7 @@ void main()
 //	vec4 illumination = lightAttenuation * (u_ambientLight +
 //											diffuseLight +
 //											specularLight);
-//	illumination += CalcDirectionalLight();
+//	vec4 illumination = CalcDirectionalLight();
 //	vec4 illumination = CalcDirectionalLight() + CalcPointLights();
 	vec4 illumination = CalcDirectionalLight() + CalcPointLights() + CalcSpotLights();
 //	vec4 illumination = CalcSpotLights();
