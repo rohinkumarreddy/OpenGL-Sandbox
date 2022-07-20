@@ -147,7 +147,7 @@ vec4 CalcPointLight(PointLight pLight)
 vec4 CalcSpotLight(SpotLight sLight)
 {
 	vec3 rayDirection = normalize(p_pos - sLight.base.position);
-	float slFactor = dot(rayDirection, sLight.direction);
+	float slFactor = dot(rayDirection, normalize(sLight.direction));
 	
 	if(slFactor > sLight.edge)
 	{
@@ -205,7 +205,9 @@ void main()
 //											diffuseLight +
 //											specularLight);
 //	illumination += CalcDirectionalLight();
-	vec4 illumination = CalcDirectionalLight() + CalcPointLights();
+//	vec4 illumination = CalcDirectionalLight() + CalcPointLights();
+	vec4 illumination = CalcDirectionalLight() + CalcPointLights() + CalcSpotLights();
+//	vec4 illumination = CalcSpotLights();
 //	vec4 illumination = CalcPointLights();
 	illumination = clamp(illumination, 0, 1);
 

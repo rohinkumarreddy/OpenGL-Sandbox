@@ -9,6 +9,7 @@ class lightData;
 class Camera;
 class Texture;
 class PointLight;
+class SpotLight;
 class DirectionalLight;
 
 class Renderer
@@ -31,7 +32,8 @@ private:
 	Shader* m_pTexShader;			//texture shader
 	Shader* m_pShaderPT;			//pass-through shader
 	lightData* m_pLightData;		//light data ptr
-	std::vector<PointLight*> m_PointLightVec;		//point light
+	std::vector<PointLight*> m_PointLightVec;		//point lights
+	std::vector<SpotLight*> m_spotLightVec;		//spot lights
 	DirectionalLight* m_pDirectionalLight;		//directional light
 	/* Mesh objects */
 	Mesh* m_pMesh1;

@@ -4,8 +4,9 @@
 
 int SpotLight::lightCount = 0;
 
-SpotLight::SpotLight() : PointLight()
+SpotLight::SpotLight() : PointLight(true)
 {
+	m_lightIndx = lightCount;
 	m_direction = glm::vec3(0.0f, -1.0f, 0.0f);
 	m_edge = 0.0f;
 	m_procEdge = cosf(glm::radians(m_edge));
@@ -21,8 +22,9 @@ SpotLight::SpotLight(	GLfloat red, GLfloat green, GLfloat blue,
 	: PointLight(	red, green, blue,
 					aIntensity, dIntensity,
 					xPos, yPos, zPos,
-					con, lin, exp, cut	)
+					con, lin, exp, cut, true	)
 {
+	m_lightIndx = lightCount;
 	m_direction = glm::normalize(glm::vec3(xDir, yDir, zDir));
 	m_edge = edge;
 	m_procEdge = cosf(glm::radians(m_edge));
@@ -61,12 +63,7 @@ void SpotLight::UseLight(Shader* p_shader)
 {
 	if (p_shader != nullptr)
 	{
-		p_shader->setUniform("u_lightPos", m_position);
-		p_shader->setUniform("u_lAttenuationFac", glm::vec3(m_constant,
-															m_linear,
-															m_exponent));
-		//p_shader->setUniform("u_lightDir", m_direction);
-		//p_shader->setUniform("u_lightEdge", m_procEdge);
+		p_shader->updateLightParams(this);
 		//Light::UseLight(p_shader);
 	}
 }

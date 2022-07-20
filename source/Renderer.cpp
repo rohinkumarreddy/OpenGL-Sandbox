@@ -10,7 +10,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "lightData.h"
-#include "PointLight.h"
+#include "SpotLight.h"
 #include "DirectionalLight.h"
 
 Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
@@ -39,6 +39,7 @@ Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	m_PointLightVec.push_back(new PointLight());
 	m_PointLightVec.push_back(new PointLight());
 	m_PointLightVec.push_back(new PointLight());
+	m_spotLightVec.push_back(new SpotLight());
 }
 
 Renderer::~Renderer()
@@ -108,6 +109,16 @@ Renderer::~Renderer()
 		}
 		m_PointLightVec.clear();
 	}
+	if (!m_spotLightVec.empty())
+	{
+		for each (auto var in m_spotLightVec)
+		{
+			if (var != nullptr)
+				delete var;
+			var = nullptr;
+		}
+		m_spotLightVec.clear();
+	}
 	if (m_pDirectionalLight != nullptr)
 		delete m_pDirectionalLight;
 	m_pDirectionalLight = nullptr;
@@ -160,12 +171,17 @@ void Renderer::initialize()
 		"u_MWMtx",
 		"u_material.specularIntensity",
 		"u_material.shininess",
-		"u_pointLightCount"
+		"u_pointLightCount",
+		"u_spotLightCount"
 	});
 
 	/* Add light sources */
 	m_pTexShader->addLightSource(m_pDirectionalLight);
 	for each (auto var in m_PointLightVec)
+	{
+		m_pTexShader->addLightSource(var);
+	}
+	for each (auto var in m_spotLightVec)
 	{
 		m_pTexShader->addLightSource(var);
 	}
@@ -263,7 +279,24 @@ void Renderer::draw()
 				break;
 			}*/
 		}
+		for each (auto var in m_spotLightVec)
+		{
+			var->setIntensity(0.55f, 0.55f);
+			var->setPosition(m_pLightData->pos.x,
+							 m_pLightData->pos.y,
+							 m_pLightData->pos.z);
+			//Light attenuation(kC, kL, kQ)
+			var->setAttenuation(m_pLightData->attenuation);
+			var->setDirection(skylightDir);
+			var->setEdge(20.0f);
+		}
 		m_pDirectionalLight->setDirection(skylightDir);//(glm::vec3(0.0f, 0.0f, -1.0f));
+	}
+
+	if (!m_spotLightVec.empty() && m_pCamera != nullptr)
+	{
+		m_spotLightVec[0]->SetFlash(m_pCamera->getPosition(),
+									m_pCamera->getViewDirection());
 	}
 
 	/* Select texture */
@@ -273,6 +306,7 @@ void Renderer::draw()
 	m_pTexShader->activate();
 
 	m_pTexShader->setUniform("u_pointLightCount", PointLight::getLightCount());
+	m_pTexShader->setUniform("u_spotLightCount", SpotLight::getLightCount());
 	m_pTexShader->setUniform("u_material.specularIntensity", 1.0f);
 	m_pTexShader->setUniform("u_material.shininess", 50.0f);
 
@@ -287,6 +321,10 @@ void Renderer::draw()
 	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
 	//Set-up light
 	for each (auto var in m_PointLightVec)
+	{
+		var->UseLight(m_pTexShader);
+	}
+	for each (auto var in m_spotLightVec)
 	{
 		var->UseLight(m_pTexShader);
 	}

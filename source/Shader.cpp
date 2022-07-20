@@ -4,7 +4,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/transform.hpp"
 
-#include "PointLight.h"
+#include "SpotLight.h"
 #include "DirectionalLight.h"
 
 //#include <string>
@@ -268,6 +268,24 @@ template<> bool Shader::addLightSource<PointLight*>(PointLight* src)
 	return true;
 }
 
+template<> bool Shader::addLightSource<SpotLight*>(SpotLight* src)
+{
+	int indx = src->getLightIndex();
+	this->addUniforms(std::vector<std::string>
+	{
+		"u_spotLights[" + std::to_string(indx) + "].direction",
+		"u_spotLights[" + std::to_string(indx) + "].edge",
+		"u_spotLights[" + std::to_string(indx) + "].base.position",
+		"u_spotLights[" + std::to_string(indx) + "].base.constant",
+		"u_spotLights[" + std::to_string(indx) + "].base.linear",
+		"u_spotLights[" + std::to_string(indx) + "].base.exponent",
+		"u_spotLights[" + std::to_string(indx) + "].base.base.color",
+		"u_spotLights[" + std::to_string(indx) + "].base.base.ambientIntensity",
+		"u_spotLights[" + std::to_string(indx) + "].base.base.diffuseIntensity"
+	});
+	return true;
+}
+
 template<class T> bool Shader::updateLightParams(T)
 {
 	std::cerr << "[Warning]: Unsupported light source type used " << std::endl;
@@ -319,6 +337,57 @@ template<> bool Shader::updateLightParams<PointLight*>(PointLight* src)
 	setUniform("u_pointLights[" +
 		std::to_string(indx) +
 		"].base.diffuseIntensity",
+		src->getDiffusionIntensity());
+	return true;
+}
+
+template<> bool Shader::updateLightParams<SpotLight*>(SpotLight* src)
+{
+	int indx = src->getLightIndex();
+
+	setUniform("u_spotLights[" +
+		std::to_string(indx) +
+		"].direction",
+		src->getDirection());
+
+	setUniform("u_spotLights[" +
+		std::to_string(indx) +
+		"].edge",
+		src->getEdge());
+
+	setUniform("u_spotLights[" +
+		std::to_string(indx) +
+		"].base.position",
+		src->getPosition());
+
+	setUniform("u_spotLights[" +
+		std::to_string(indx) +
+		"].base.constant",
+		src->getConstant());
+
+	setUniform("u_spotLights[" +
+		std::to_string(indx) +
+		"].base.linear",
+		src->getLinear());
+
+	setUniform("u_spotLights[" +
+		std::to_string(indx) +
+		"].base.exponent",
+		src->getExponent());
+
+	setUniform("u_spotLights[" +
+		std::to_string(indx) +
+		"].base.base.color",
+		src->getColor());
+
+	setUniform("u_spotLights[" +
+		std::to_string(indx) +
+		"].base.base.ambientIntensity",
+		src->getAmbientIntensity());
+
+	setUniform("u_spotLights[" +
+		std::to_string(indx) +
+		"].base.base.diffuseIntensity",
 		src->getDiffusionIntensity());
 	return true;
 }

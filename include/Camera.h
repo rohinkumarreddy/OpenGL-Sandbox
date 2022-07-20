@@ -21,6 +21,7 @@ public:
 
 	glm::mat4 getWorldToViewMtx() const;
 	glm::vec3 getPosition() const;
+	glm::vec3 getViewDirection() const;
 	void mouseUpdate(const glm::vec2& mouseDelta, mouseKeyType type);
 	void moveForward();
 	void moveBackward();

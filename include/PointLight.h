@@ -5,11 +5,11 @@
 class PointLight : public Light
 {
 public:
-	PointLight();
+	PointLight(bool skipIndx = false);
 	PointLight(GLfloat red, GLfloat green, GLfloat blue,
 		GLfloat aIntensity, GLfloat dIntensity,
 		GLfloat xPos, GLfloat yPos, GLfloat zPos,
-		GLfloat con, GLfloat lin, GLfloat exp, GLfloat cut);
+		GLfloat con, GLfloat lin, GLfloat exp, GLfloat cut, bool skipIndx = false);
 
 	void UseLight(GLuint ambientIntensityLocation, GLuint ambientColourLocation,
 		GLuint diffuseIntensityLocation, GLuint positionLocation,
@@ -99,4 +99,5 @@ protected:
 			m_cutoff;
 private:
 	int m_lightIndx;
+	bool m_SkipIndx;
 };

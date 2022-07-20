@@ -109,6 +109,12 @@ glm::vec3 Camera::getPosition() const
 	return m_position;
 }
 
+glm::vec3 Camera::getViewDirection() const
+{
+	return m_viewDirection;
+}
+
+
 void Camera::update()
 {
 #ifdef USE_QUEUED_MOVEMENT
