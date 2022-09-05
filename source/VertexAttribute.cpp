@@ -24,6 +24,13 @@ bool VertexAttribute::fillAttribListfromProfile(	VertexAttributeProfile& profile
 		attributes.push_back(VertexAttribute(VertexAttribute::VertexDataType::_FLOAT_, TRIO));
 		break;
 	}
+	case VertexAttributeProfile::POS_TEX_NOR:
+	{
+		attributes.push_back(VertexAttribute(VertexAttribute::VertexDataType::_FLOAT_, TRIO));
+		attributes.push_back(VertexAttribute(VertexAttribute::VertexDataType::_FLOAT_, TRIO));
+		attributes.push_back(VertexAttribute(VertexAttribute::VertexDataType::_FLOAT_, TRIO));
+		break;
+	}
 	case VertexAttributeProfile::POS_COL:
 	{
 		attributes.push_back(VertexAttribute(VertexAttribute::VertexDataType::_FLOAT_, TRIO));

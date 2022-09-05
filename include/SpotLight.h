@@ -14,7 +14,7 @@ public:
 				GLfloat xPos, GLfloat yPos, GLfloat zPos,
 				GLfloat xDir, GLfloat yDir, GLfloat zDir,
 				GLfloat con, GLfloat lin, GLfloat exp,
-				GLfloat cut, GLfloat edg	);
+				GLfloat cut, GLfloat edg, GLfloat epsilon);
 
 	void UseLight(	GLuint ambientIntensityLocation,
 					GLuint ambientColourLocation,
@@ -46,6 +46,15 @@ public:
 	{
 		m_edge = edge;
 		m_procEdge = cosf(glm::radians(m_edge));
+		m_procOuterEdge = cosf(glm::radians(m_edge + m_Epsilon));
+		m_procEpsilon = m_procEdge - m_procOuterEdge;
+	}
+
+	inline void setEpsilon(GLfloat epsilon)
+	{
+		m_Epsilon = epsilon;
+		m_procOuterEdge = cosf(glm::radians(m_edge + m_Epsilon));
+		m_procEpsilon = m_procEdge - m_procOuterEdge;
 	}
 
 	inline glm::vec3 getDirection()
@@ -68,6 +77,26 @@ public:
 		return m_procEdge;
 	}
 
+	inline glm::vec2 getOuterEdgeVec()
+	{
+		return glm::vec2(m_Epsilon, m_procOuterEdge);
+	}
+
+	inline GLfloat getDegEpsilon()
+	{
+		return m_Epsilon;
+	}
+
+	inline GLfloat getEpsilon()
+	{
+		return m_procEpsilon;
+	}
+
+	inline GLfloat getOuterEdge()
+	{
+		return m_procOuterEdge;
+	}
+
 	inline const int getLightIndex()
 	{
 		return m_lightIndx;
@@ -86,7 +115,10 @@ private:
 	glm::vec3 m_direction;
 
 	GLfloat m_edge,
-			m_procEdge;
+			m_procEdge,
+			m_procOuterEdge,
+			m_procEpsilon,
+			m_Epsilon;
 	int m_lightIndx;
 };
 

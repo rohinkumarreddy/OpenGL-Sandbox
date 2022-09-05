@@ -5,13 +5,27 @@
 class ShapeGenerator
 {
 public:
-	static ShapeData makeTriangle();
-	static ShapeData makeCube();
-	static ShapeData makeArrow();
-	static ShapeData makeTorus(unsigned int tesselation = 20);
-	static ShapeData makeSphere(unsigned int tesselation = 20);
-	static ShapeData makePlane(unsigned int dimensions = 10, unsigned int texRepeat = 0);
-	static ShapeData makeTeapot(unsigned int tesselation = 10, const glm::mat4& lidTransform = glm::mat4(1.0f));
+	enum class ShapeAttributeProfile
+	{
+		POS_COL_TEX_NOR,
+		POS_COL_NOR,
+		POS_TEX_NOR,
+		POS_NOR,
+		POS_COL
+	};
+	static ShapeData makeTriangle(ShapeAttributeProfile);
+	static ShapeData makeCube(ShapeAttributeProfile);
+	static ShapeData makeArrow(ShapeAttributeProfile);
+	static ShapeData makeTorus( ShapeAttributeProfile,
+								unsigned int tesselation = 20);
+	static ShapeData makeSphere( ShapeAttributeProfile,
+								 unsigned int tesselation = 20);
+	static ShapeData makePlane( ShapeAttributeProfile,
+								unsigned int dimensions = 10,
+								unsigned int texRepeat = 0);
+	static ShapeData makeTeapot(ShapeAttributeProfile, 
+								unsigned int tesselation = 10,
+								const glm::mat4& lidTransform = glm::mat4(1.0f));
 	static ShapeData generateNormals(const ShapeData& data);
 
 private:

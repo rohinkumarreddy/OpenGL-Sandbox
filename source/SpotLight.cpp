@@ -8,8 +8,11 @@ SpotLight::SpotLight() : PointLight(true)
 {
 	m_lightIndx = lightCount;
 	m_direction = glm::vec3(0.0f, -1.0f, 0.0f);
-	m_edge = 0.0f;
+	m_edge = 12.0f;
 	m_procEdge = cosf(glm::radians(m_edge));
+	m_Epsilon = 5.0f;
+	m_procOuterEdge = cosf(glm::radians(m_edge + m_Epsilon));
+	m_procEpsilon = m_procEdge - m_procOuterEdge;
 	lightCount++;
 }
 
@@ -18,7 +21,7 @@ SpotLight::SpotLight(	GLfloat red, GLfloat green, GLfloat blue,
 						GLfloat xPos, GLfloat yPos, GLfloat zPos,
 						GLfloat xDir, GLfloat yDir, GLfloat zDir,
 						GLfloat con, GLfloat lin, GLfloat exp,
-						GLfloat cut, GLfloat edge	)
+						GLfloat cut, GLfloat edge, GLfloat epsilon	)
 	: PointLight(	red, green, blue,
 					aIntensity, dIntensity,
 					xPos, yPos, zPos,
@@ -27,7 +30,10 @@ SpotLight::SpotLight(	GLfloat red, GLfloat green, GLfloat blue,
 	m_lightIndx = lightCount;
 	m_direction = glm::normalize(glm::vec3(xDir, yDir, zDir));
 	m_edge = edge;
+	m_Epsilon = epsilon;
 	m_procEdge = cosf(glm::radians(m_edge));
+	m_procOuterEdge = cosf(glm::radians(m_edge + m_Epsilon));
+	m_procEpsilon = m_procEdge - m_procOuterEdge;
 	lightCount++;
 }
 

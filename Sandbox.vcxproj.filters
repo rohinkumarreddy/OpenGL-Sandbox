@@ -81,6 +81,9 @@
     <ClInclude Include="include\VertexAttribute.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Model.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="include\DrawWidget.h">
@@ -154,6 +157,9 @@
     <ClCompile Include="source\VertexAttribute.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="source\Model.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\FragmentShader.glsl">
@@ -179,6 +185,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="shaders\VertexShader1Light.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\FragmentShaderExtraColor.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\VertexShaderExtraColor.glsl">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

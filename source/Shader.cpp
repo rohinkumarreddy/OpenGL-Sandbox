@@ -275,6 +275,7 @@ template<> bool Shader::addLightSource<SpotLight*>(SpotLight* src)
 	{
 		"u_spotLights[" + std::to_string(indx) + "].direction",
 		"u_spotLights[" + std::to_string(indx) + "].edge",
+		"u_spotLights[" + std::to_string(indx) + "].epsilon",
 		"u_spotLights[" + std::to_string(indx) + "].base.position",
 		"u_spotLights[" + std::to_string(indx) + "].base.constant",
 		"u_spotLights[" + std::to_string(indx) + "].base.linear",
@@ -354,6 +355,11 @@ template<> bool Shader::updateLightParams<SpotLight*>(SpotLight* src)
 		std::to_string(indx) +
 		"].edge",
 		src->getEdge());
+
+	setUniform("u_spotLights[" +
+		std::to_string(indx) +
+		"].epsilon",
+		src->getEpsilon());
 
 	setUniform("u_spotLights[" +
 		std::to_string(indx) +

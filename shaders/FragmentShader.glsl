@@ -37,6 +37,7 @@ struct SpotLight
 	PointLight base;
 	vec3 direction;
 	float edge;
+	float epsilon;
 };
 
 /* Object surface material */
@@ -55,11 +56,7 @@ in vec2 p_texCoords;			//texture coordinates
 out vec4 color;
 
 /* Uniforms */
-//uniform vec4 u_ambientLight;	//ambient light|brightness
-//uniform vec4 u_diffusedLight;	//diffused light|brightness
-//uniform vec3 u_lightPos;		//light source postion|world space
 uniform vec3 u_eyePos;			//eye postion|world space
-//uniform vec4 u_lAttenuationFac; //light attenuation fators|(kC,kL,kQ,cuttoff)
 
 uniform int u_pointLightCount;	//number of active point lights
 uniform int u_spotLightCount;	//number of active spot lights
@@ -71,75 +68,71 @@ uniform SpotLight u_spotLights[MAX_SPOT_LIGHTS];		//collection of spot lights
 uniform sampler2D texSample;	//texture sampler
 uniform Material u_material;	//Material description
 
-/* function definitions */
-
-/* Light source attenuation calculation */
-//float LightAttenuation(float lightDist)
-//{
-//	lightDist = max(lightDist, 0);
-//
-//	/* light attenuation factors */
-//	float kc = u_lAttenuationFac.x;		//constant attenuation factor
-//	float kl = u_lAttenuationFac.y;		//linear attenuation factor
-//	float kq = u_lAttenuationFac.z;		//quadratic attenuation factor
-//	float cutoff = u_lAttenuationFac.a; //distance from source at which light attenuation is max
-//	
-//	float linearComponent = kl*lightDist;
-//	float quadraticComponent = kq*pow(lightDist,2);
-//	float attenuation = 1.0/(kc+linearComponent+quadraticComponent);
-//
-//	/* Scale or bias attenuation */
-//	// attenuation = 0 at extent of max influence
-//	// attenuation = 1 at d = 0
-//	attenuation = (attenuation - cutoff)/(1-cutoff);
-//	attenuation = clamp(attenuation, 0, 1);
-//	
-//	return attenuation;
-//}
-
+//CalcLightByDirection: Calculates light by direction at the point of illumination
+//Input: light source, direction: vector from light source to point of illumination
+//Output: light at the point of illumination in color
 vec4 CalcLightByDirection(Light light, vec3 direction)
 {
-	vec4 ambientColor = vec4(light.color, 1.0f) * light.ambientIntensity;
-	ambientColor = clamp(ambientColor, 0, 1);
+	//Ambient light
+	vec4 ambientLight = vec4(light.color, 1.0f) * light.ambientIntensity;
+	ambientLight = clamp(ambientLight, 0, 1);
+
+	//vector from point of illumiation to the light source
+	vec3 lightVec = -direction;
 	
-	float diffuseFactor = max(dot(normalize(p_normal), normalize(-direction)), 0.0f);
-	vec4 diffuseColor = vec4(light.color * light.diffuseIntensity * diffuseFactor, 1.0f);
-	diffuseColor = clamp(diffuseColor, 0, 1);
+	//Diffuse factor is the component of the light vector
+	//along the normal at the point of illumination
+	float diffuseFactor = max(dot(normalize(p_normal), normalize(lightVec)), 0.0f);
+	//Diffused light
+	vec4 diffusedLight = vec4(light.color * light.diffuseIntensity * diffuseFactor, 1.0f);
+	diffusedLight = clamp(diffusedLight, 0, 1);
 	
-	vec4 specularColor = vec4(0, 0, 0, 0);
+	vec4 specularLight = vec4(0, 0, 0, 0);
 	
-	if(diffuseFactor > 0.0f)
+//	if(diffuseFactor > 0.0f)
 	{
-		vec3 fragToEye = normalize(u_eyePos - p_pos);
-		vec3 reflectedVertex = normalize(reflect(direction, normalize(p_normal)));
-		
-		float specularFactor = clamp(dot(fragToEye, reflectedVertex), 0, 1);
-		if(specularFactor > 0.0f)
+		//vector from point of illumination to the eye
+		vec3 eyeVec = normalize(u_eyePos - p_pos);
+		//reflect light direction by the normal at the point of illumination
+		vec3 reflectedLightVec = normalize(reflect(normalize(direction), normalize(p_normal)));
+		//Specular factor is the component of the reflected light vector
+		//along the eye vector at the point of illumination
+		float specularFactor = max(dot(eyeVec, reflectedLightVec), 0);
 		{
 			specularFactor = pow(specularFactor, u_material.shininess);
-			specularColor = vec4(light.color *
+			specularLight = vec4(light.color *
 								  u_material.specularIntensity *
 								  specularFactor, 1.0f);
-			specularColor = clamp(specularColor, 0, 1);
+			specularLight = clamp(specularLight, 0, 1);
 		}
 	}
 
-	return (ambientColor + diffuseColor + specularColor);
+	return (ambientLight + diffusedLight + specularLight);
 }
 
+//CalcDirectionalLight: Calculates light at the point of illumination using
+//light direction, a vector from light source to point of illumination
+//Output: light at the point of illumination in color
 vec4 CalcDirectionalLight()
 {
 	return CalcLightByDirection(u_directionalLight.base,
-								-u_directionalLight.direction);
+								u_directionalLight.direction);
 }
 
+//CalcPointLight: Calculates light at the point of illumination using
+//light direction, a vector from light source to point of illumination
+//light attenuation, light propagation factor based on distance from source
+//Output: light at the point of illumination in color
 vec4 CalcPointLight(PointLight pLight)
 {
+	//vector from light source to the point of illumination
 	vec3 direction = p_pos - pLight.position;
 	float distance = length(direction);
 	direction = normalize(direction);
 	
+	//calculate light based on the direction(directional light)
 	vec4 color = CalcLightByDirection(pLight.base, direction);
+	//calculate the attenuation based on distance from source
 	float attenuation = pLight.exponent * distance * distance +
 						pLight.linear * distance +
 						pLight.constant;
@@ -147,72 +140,65 @@ vec4 CalcPointLight(PointLight pLight)
 	return (color / attenuation);
 }
 
+//CalcSpotLight: Calculates light at the point of illumination using
+//light direction, a vector from light source to the focus-point of illumination
+//light attenuation, light propagation factor based on distance from source
+//within a given radius around the point of illumination
+//Output: light at the point of illumination in color
 vec4 CalcSpotLight(SpotLight sLight)
 {
-	vec3 rayDirection = normalize(p_pos - sLight.base.position);
-	float slFactor = dot(rayDirection, normalize(-sLight.direction));
+	//vector from light source to the point of illumination
+	vec3 direction = normalize(p_pos - sLight.base.position);
+	//vector from intended focus-point of illumination to the light source
+	vec3 lightFocusVec = sLight.direction;
+	//calculate the component of light focus vector along light direction
+	float slFactor = dot(direction, normalize(lightFocusVec));
 	
-	if(slFactor > sLight.edge)
-	{
-		vec4 color = CalcPointLight(sLight.base);
-		
-		return color * (1.0f - (1.0f - slFactor)*(1.0f/(1.0f - sLight.edge)));
-		
-	} else {
-		return vec4(0, 0, 0, 0);
-	}
+	//light edge is the component of the 
+	//edge vector(radius limit) along
+	//the focus direction
+	vec4 light = CalcPointLight(sLight.base);
+	float epsilon = 0.021f;//cos12 - cos 17
+	float intensity = clamp((slFactor - (sLight.edge - sLight.epsilon))/epsilon, 0, 1);
+	return light * intensity;
 }
 
 vec4 CalcPointLights()
 {
-	vec4 totalColor = vec4(0, 0, 0, 0);
+	vec4 totalLight = vec4(0, 0, 0, 0);
 	for(int i = 0; i < u_pointLightCount; i++)
 	{		
-		totalColor += CalcPointLight(u_pointLights[i]);
+		totalLight += CalcPointLight(u_pointLights[i]);
 	}
 	
-	return totalColor;
+	return clamp(totalLight, 0, 1);
 }
 
 vec4 CalcSpotLights()
 {
-	vec4 totalColor = vec4(0, 0, 0, 0);
+	vec4 totalLight = vec4(0, 0, 0, 0);
 	for(int i = 0; i < u_spotLightCount; i++)
 	{		
-		totalColor += CalcSpotLight(u_spotLights[i]);
+		totalLight += CalcSpotLight(u_spotLights[i]);
 	}
 	
-	return totalColor;
+	return clamp(totalLight, 0, 1);;
 }
 
 void main()
 {
-	/* Diffused light calculation */
-//	vec3 lVec = u_lightPos - p_pos;
-//	float lightDist = length(lVec);
-//	vec3 lightVec = normalize(lVec);//normalized light vector|vertex to light source|world
-//	float brightness = dot(lightVec, normalize(p_normal));//light component along normal
-//	vec4 diffuseLight = vec4(brightness, brightness, brightness, 1.0);//color from diffused light
-//	diffuseLight = clamp(u_diffusedLight*diffuseLight, 0, 1);
-//	/* Specular light calculation */
-//	vec3 refLightVec = reflect(-lightVec, p_normal);//reflect reverse light vector by normal|world space
-//	vec3 eyeVec = normalize(u_eyePos - p_pos);//eye vector from eye to vertex position|world space
-//	float specularity = clamp(dot(refLightVec, eyeVec), 0, 1);//relected light vector component along eye vector|world space
-//	specularity = pow(specularity, 50);//specular exponent
-//	vec4 specularLight = vec4(specularity, specularity, specularity, 1);//color from specular light
-//	specularLight = clamp(specularLight, 0, 1);
-//	
-//	/* light attenuation */
-//	float lightAttenuation = LightAttenuation(lightDist);
-//	vec4 illumination = lightAttenuation * (u_ambientLight +
-//											diffuseLight +
-//											specularLight);
-//	vec4 illumination = CalcDirectionalLight();
-//	vec4 illumination = CalcDirectionalLight() + CalcPointLights();
 	vec4 illumination = CalcDirectionalLight() + CalcPointLights() + CalcSpotLights();
-//	vec4 illumination = CalcSpotLights();
-//	vec4 illumination = CalcPointLights();
 	illumination = clamp(illumination, 0, 1);
 
 	color = clamp(texture(texSample, p_texCoords) * illumination, 0, 1);
 }
+
+//	if(slFactor > sLight.edge)
+//	{
+//		vec4 light = CalcPointLight(sLight.base);
+//		
+////		light * ( 1.0f - ( (1.0f - slFactor)/(1.0f - sLight.edge) ) );
+//		return clamp(light, 0, 1);
+//	}
+//	else
+//		return vec4(0, 0, 0, 1);

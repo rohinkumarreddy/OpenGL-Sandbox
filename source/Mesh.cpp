@@ -25,27 +25,28 @@ void Mesh::createMesh(shapeType type)
 {
 	/* Shape object */
 	ShapeData shape;
+	ShapeGenerator::ShapeAttributeProfile profile = ShapeGenerator::ShapeAttributeProfile::POS_TEX_NOR;
 	/* Choose shape */
 	switch (type)
 	{
 	case shapeType::_TEAPOT_:
-		shape = ShapeGenerator::makeTeapot();
+		shape = ShapeGenerator::makeTeapot(profile);
 		break;
 	case shapeType::_ARROW_:
-		shape = ShapeGenerator::makeArrow();
+		shape = ShapeGenerator::makeArrow(profile);
 		break;
 	case shapeType::_PLANE_:
-		shape = ShapeGenerator::makePlane(100, 2);
+		shape = ShapeGenerator::makePlane(profile, 2, 2);
 		break;
 	case shapeType::_CUBE_:
-		shape = ShapeGenerator::makeCube();
+		shape = ShapeGenerator::makeCube(profile);
 		break;
 	case shapeType::_TORUS_:
-		shape = ShapeGenerator::makeTorus(50);
+		shape = ShapeGenerator::makeTorus(profile, 50);
 		break;
 	case shapeType::_SPHERE_:
 	default:
-		shape = ShapeGenerator::makeSphere(50);
+		shape = ShapeGenerator::makeSphere(profile, 50);
 		break;
 	}
 	/* Create mesh */
@@ -53,7 +54,7 @@ void Mesh::createMesh(shapeType type)
 				shape.indices,
 				shape.numVertices,
 				shape.numIndices,
-				VertexAttribute::VertexAttributeProfile::POS_COL_TEX_NOR);
+				VertexAttribute::VertexAttributeProfile::POS_TEX_NOR);
 	/* Clean up */
 	shape.cleanUp();
 }
@@ -76,27 +77,38 @@ void Mesh::createMesh(void* vertices,
 					  std::vector<VertexAttribute>& attributes)
 {
 	m_idxCnt = numOfIndices;
+	//std::cout << "[Debug]: createMesh chk 1\n";
 
 	const size_t _VERTEX_BYTE_SIZE_ = VertexAttribute::computeVertexByteOffset(attributes);
 
+	//std::cout << "[Debug]: createMesh chk 2\n";
 	/* Vertex array object */
 	m_pVAO = new VertexArray();
+	//std::cout << "[Debug]: createMesh chk 3\n";
 
 	/* Index buffer object */
 	m_pIBO = new IndexBuffer(indices, numOfIndices);
 
+	//std::cout << "[Debug]: createMesh chk 4\n" << "numofVertices " << numOfVertices;
+	//std::cout << "\n_VERTEX_BYTE_SIZE_ " << _VERTEX_BYTE_SIZE_ << "\n";
+	//std::cout << "\nfloat size " << sizeof(float) << "\n";
+
 	/* Vertex buffer object */
 	m_pVBO = new VertexBuffer(vertices, _VERTEX_BYTE_SIZE_ * numOfVertices);
+	//std::cout << "[Debug]: createMesh chk 5\n";
 
 	m_pVAO->bind();
 	m_pIBO->bind();
 	m_pVBO->bind();
+	//std::cout << "[Debug]: createMesh chk 6\n";
 
 	/* Vertex attributes */
 	m_pVAO->addBuffer(*m_pVBO, attributes);
+	//std::cout << "[Debug]: createMesh chk 7\n";
 
 	//Unbind Vertex array
 	m_pVAO->unBind();
+	//std::cout << "[Debug]: createMesh chk 8\n";
 }
 
 void Mesh::createMesh(Vertex* vertices,

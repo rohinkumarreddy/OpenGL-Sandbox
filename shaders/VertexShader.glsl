@@ -2,8 +2,8 @@
 
 /* Attributes */
 in layout(location=0) vec4 a_position;	//vertex position|model space
-in layout(location=1) vec3 a_color;		//vertex color
-in layout(location=2) vec3 a_texCoords;	//texture coordinates
+//in layout(location=1) vec3 a_color;		//vertex color
+in layout(location=1) vec3 a_texCoords;	//texture coordinates
 in layout(location=3) vec3 a_normal;	//surface normals|model space
 
 /* Uniforms */	

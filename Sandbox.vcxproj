@@ -94,13 +94,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>./;./include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./;./include;./vendor/assimp/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>
       </PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>./lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>./lib;./vendor/assimp/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
@@ -189,6 +189,7 @@
     <ClInclude Include="include\Light.h" />
     <ClInclude Include="include\lightData.h" />
     <ClInclude Include="include\Mesh.h" />
+    <ClInclude Include="include\Model.h" />
     <ClInclude Include="include\PointLight.h" />
     <ClInclude Include="include\Renderer.h" />
     <ClInclude Include="include\Shader.h" />
@@ -215,6 +216,7 @@
     <ClCompile Include="source\Light.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
+    <ClCompile Include="source\Model.cpp" />
     <ClCompile Include="source\PointLight.cpp" />
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\SandboxMainWindow.cpp" />
@@ -232,10 +234,12 @@
     <None Include="README.md" />
     <None Include="shaders\FragmentShader.glsl" />
     <None Include="shaders\FragmentShader1Light.glsl" />
+    <None Include="shaders\FragmentShaderExtraColor.glsl" />
     <None Include="shaders\FragmentShaderNoTex.glsl" />
     <None Include="shaders\FragmentShaderPT.glsl" />
     <None Include="shaders\VertexShader.glsl" />
     <None Include="shaders\VertexShader1Light.glsl" />
+    <None Include="shaders\VertexShaderExtraColor.glsl" />
     <None Include="shaders\VertexShaderNoTex.glsl" />
     <None Include="shaders\VertexShaderPT.glsl" />
   </ItemGroup>

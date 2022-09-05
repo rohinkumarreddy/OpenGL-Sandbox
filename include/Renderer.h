@@ -3,6 +3,7 @@
 #include <vector>
 
 //forward declaration
+class Model;
 class Mesh;
 class Shader;
 class lightData;
@@ -43,6 +44,8 @@ private:
 	Mesh* m_pMesh5;
 	Mesh* m_pMesh6;
 	Mesh* m_pTexMesh;
+	Model* m_pModel1;
+	Model* m_pModel2;
 	/* Texture */
 	Texture* m_pTex1;
 	Texture* m_pTex2;

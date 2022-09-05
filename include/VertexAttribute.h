@@ -23,6 +23,7 @@ public:
 	{
 		POS_COL_TEX_NOR,
 		POS_COL_NOR,
+		POS_TEX_NOR,
 		POS_NOR,
 		POS_COL
 	};

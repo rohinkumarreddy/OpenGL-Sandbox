@@ -21,14 +21,14 @@ Texture::~Texture()
 	clear();
 }
 
-void Texture::loadTexture()
+bool Texture::loadTexture()
 {
 	QString path = QString::fromStdString(m_texPath);
 	QFile m(path);
 	if (!m.exists())
 	{
 		QMessageBox::critical(nullptr, "Error", "Unable to find required texture", QMessageBox::StandardButton::Ok);
-		return;
+		return false;
 	}
 
 	QImage texImg(path);
@@ -49,12 +49,18 @@ void Texture::loadTexture()
 	GLCALL(glGenerateMipmap(GL_TEXTURE_2D));
 
 	GLCALL(glBindTexture(GL_TEXTURE_2D, 0));
+	return true;
 }
 
 void Texture::activate()
 {
 	GLCALL(glActiveTexture(GL_TEXTURE0));
 	GLCALL(glBindTexture(GL_TEXTURE_2D, m_texID));
+}
+
+void Texture::deActivate()
+{
+	GLCALL(glBindTexture(GL_TEXTURE_2D, NULL));
 }
 
 void Texture::clear()
