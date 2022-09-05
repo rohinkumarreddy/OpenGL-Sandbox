@@ -158,8 +158,7 @@ vec4 CalcSpotLight(SpotLight sLight)
 	//edge vector(radius limit) along
 	//the focus direction
 	vec4 light = CalcPointLight(sLight.base);
-	float epsilon = 0.021f;//cos12 - cos 17
-	float intensity = clamp((slFactor - (sLight.edge - sLight.epsilon))/epsilon, 0, 1);
+	float intensity = clamp((slFactor - (sLight.edge - sLight.epsilon))/sLight.epsilon, 0, 1);
 	return light * intensity;
 }
 
