@@ -3,6 +3,7 @@
 //#include "glm/glm.hpp"//included in ShapeGenerator
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/transform.hpp"
+#include <glm/gtc/type_ptr.hpp>
 
 #include "Renderer.h"
 #include "Mesh.h"
@@ -13,6 +14,39 @@
 #include "lightData.h"
 #include "SpotLight.h"
 #include "DirectionalLight.h"
+
+//#define _2D_DRAW_
+
+#ifdef _2D_DRAW_
+void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar)
+{
+	const GLdouble pi = 3.1415926535897932384626433832795;
+	GLdouble fW, fH;
+
+	//fH = tan( (fovY / 2) / 180 * pi ) * zNear;
+	fH = tan(fovY / 360 * pi) * zNear;
+	fW = fH * aspect;
+
+	glFrustum(-fW, fW, -fH, fH, zNear, zFar);
+}
+
+//Compat method: gluLookAt deprecated
+void util_compat_gluLookAt(GLfloat eyeX, GLfloat eyeY, GLfloat eyeZ, GLfloat lookAtX, GLfloat lookAtY, GLfloat lookAtZ, GLfloat upX, GLfloat upY, GLfloat upZ) {
+	glm::vec3 X, Y, Z;
+	Z = glm::normalize(glm::vec3(eyeX - lookAtX, eyeY - lookAtY, eyeZ - lookAtZ));
+	Y = glm::vec3(upX, upY, upZ);
+	X = glm::cross(Y , Z);
+	Y = glm::cross(Z , X);
+	X = glm::normalize(X);
+	Y = glm::normalize(Y);
+	// mat is given transposed so OpenGL can handle it.
+	glm::mat4x4 mat(X.x, Y.x,   Z.x,   0,
+					X.y, Y.y,   Z.y,   0,
+					X.z, Y.z,   Z.z,   0,
+					-eyeX,     -eyeY,      -eyeZ,      1 );
+	glMultMatrixf(glm::value_ptr(mat));
+}
+#endif
 
 Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	:
@@ -201,8 +235,8 @@ void Renderer::initialize()
 	/* Query uniform */
 	m_pShaderPT->initUniforms(std::vector<std::string>{"u_MVPMtx"});
 
-	m_pModel1->LoadModel("D:/Workplace/OpenGLTuT/Udemy-BenCook/Sandbox/Models/uh60.obj");//x-wing.obj");
-	m_pModel2->LoadModel("D:/Workplace/OpenGLTuT/Udemy-BenCook/Sandbox/Models/x-wing.obj");//x-wing.obj");
+	m_pModel1->LoadModel("D:/Workplace/OpenGLTuT/Udemy-BenCook/Sandbox/Models/ISS_2016.obj");//uh60.obj");
+	m_pModel2->LoadModel("D:/Workplace/OpenGLTuT/Udemy-BenCook/Sandbox/Models/helmet.obj");//x-wing.obj");
 }
 
 /*Shader code*/
@@ -255,11 +289,12 @@ void Renderer::draw()
 	/* Matrix transformations */
 	//Done only to learn | not optimal memory wise
 	glm::mat4 MVPMtx = glm::mat4(1.0f);
-	glm::mat4 projMtx = glm::perspective(glm::radians(45.0f),
+	glm::mat4 projMtx = glm::perspective(glm::radians(60.0f),
 						((float)m_width) / m_height, 0.1f, 100.0f);//view to projection
 	glm::mat4 viewMtx = m_pCamera->getWorldToViewMtx();//world to view
 	glm::mat4 VPMtx = projMtx * viewMtx;//world to projection
 	glm::vec3 eyePos = m_pCamera->getPosition();//eye position|world space
+	glm::vec3 viewDir = m_pCamera->getViewDirection();//view direction|world space
 
 	//Ambient-light|Diffused-light
 	m_pDirectionalLight->setIntensity(0.005f, 0.3f);
@@ -272,7 +307,7 @@ void Renderer::draw()
 		skylightDir /= skylightDir.length();
 		for each (auto var in m_PointLightVec)
 		{
-			var->setIntensity(0.005f, 0.5f);
+			var->setIntensity(0.005f, 0.2f);
 			var->setPosition(m_pLightData->pos.x + (pow(-1, var->getLightIndex()) * (var->getLightIndex() > 0) * 9.0f),
 				m_pLightData->pos.y,
 				m_pLightData->pos.z + (pow(-1, var->getLightIndex()) * (var->getLightIndex() > 0) * 9.0f));
@@ -281,22 +316,27 @@ void Renderer::draw()
 		}
 		for each (auto var in m_spotLightVec)
 		{
-			var->setIntensity(0.5f, 1.0f);
+			var->setIntensity(0.005f, 0.05f);
 			var->setPosition(m_pLightData->pos.x,
 							 m_pLightData->pos.y,
 							 m_pLightData->pos.z);
 							 //Light attenuation(kC, kL, kQ)
-			var->setAttenuation(m_pLightData->attenuation);
+			//var->setAttenuation(m_pLightData->attenuation);
+			var->setAttenuation(glm::vec4(0.2,0,0,0));
 			var->setDirection(skylightDir);
 			var->setEdge(12.0f);
 		}
 		m_pDirectionalLight->setDirection(skylightDir);//(glm::vec3(0.0f, 0.0f, -1.0f));
 	}
 
+	/*std::cout << "view dir : (" << viewDir.x
+					<< ", " << viewDir.y
+					<< ", " << viewDir.z << ")\n";*/
+
 	if (!m_spotLightVec.empty() && m_pCamera != nullptr)
 	{
 		m_spotLightVec[0]->SetFlash(eyePos,
-									m_pCamera->getViewDirection());
+									viewDir);
 	}
 
 	/* Select texture */
@@ -307,7 +347,7 @@ void Renderer::draw()
 
 	m_pTexShader->setUniform("u_pointLightCount", PointLight::getLightCount());
 	m_pTexShader->setUniform("u_spotLightCount", SpotLight::getLightCount());
-	m_pTexShader->setUniform("u_material.specularIntensity", 0.5f);
+	m_pTexShader->setUniform("u_material.specularIntensity", 4.0f);
 	m_pTexShader->setUniform("u_material.shininess", 256.0f);
 
 	//Shape-5|cube
@@ -355,10 +395,11 @@ void Renderer::draw()
 	m_pMesh5->renderMesh();
 #endif
 	/* Select texture */
-	//m_pTex2->activate();
+	m_pTex2->activate();
 	//Shape-3|plane
-	shModelMtx = glm::translate(glm::vec3(20.0f, 0.0f, 20.0f)) *
-		glm::scale(glm::vec3(50.0f, 50.0f, 50.0f));//model to world
+	shModelMtx = glm::mat4(1.0f);//model to world
+	//shModelMtx = glm::translate(glm::vec3(20.0f, 0.0f, 20.0f)) *
+	//	glm::scale(glm::vec3(50.0f, 50.0f, 50.0f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
@@ -372,12 +413,13 @@ void Renderer::draw()
 	//model = glm::translate(model, glm::vec3(-7.0f, 0.0f, 10.0f));
 	//model = glm::scale(model, glm::vec3(0.006f, 0.006f, 0.006f));
 	//
-	shModelMtx = glm::translate(glm::vec3(2.0f, 3.0f, 0.0f)) *
-				 glm::scale(glm::vec3(0.25f, 0.25f, 0.25f)) *
+	/*shModelMtx = glm::translate(glm::vec3(2.0f, 0.5f, 0.0f)) *
+				 glm::scale(glm::vec3(0.125f, 0.125f, 0.125f)) *
 				 glm::rotate(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
-				 glm::rotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-	//shModelMtx = glm::translate(glm::vec3(-7.0f, 3.0f, 10.0f)) *
-	//			 glm::scale(glm::vec3(0.006f, 0.006f, 0.006f));//model to world
+				 glm::rotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));*/
+	shModelMtx = glm::translate(glm::vec3(2.0f, 2.0f, 0.0f)) *
+				 glm::rotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) *
+				 glm::scale(glm::vec3(0.001f, 0.001f, 0.001f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
@@ -385,8 +427,8 @@ void Renderer::draw()
 	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
 	m_pModel1->RenderModel();
 	
-	shModelMtx = glm::translate(glm::vec3(-10.0f, 3.0f, 10.0f)) *
-				 glm::scale(glm::vec3(0.006f, 0.006f, 0.006f));//model to world
+	shModelMtx = glm::translate(glm::vec3(-4.0f, 0.5f, 4.0f)) *
+				 glm::scale(glm::vec3(0.003f, 0.003f, 0.003f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform
@@ -408,18 +450,54 @@ void Renderer::draw()
 	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
 
 	//m_pMesh1->renderMesh();
-#if 0
+#if 1
 	/* Select shader program */
 	m_pShaderPT->activate();
 
-	//Shape-4|sphere|light source
-	shModelMtx = glm::translate(m_spotLightVec[0]->getPosition()) * glm::scale(glm::vec3(0.0625f, 0.0625f, 0.0625f));//model to world
-	MVPMtx = VPMtx * shModelMtx;//model to projection
+	for each (auto var in m_PointLightVec)
+	{
+		//Shape-4|sphere|light source
+		shModelMtx = glm::translate(var->getPosition()) * glm::scale(glm::vec3(0.0625f, 0.0625f, 0.0625f));//model to world
+		MVPMtx = VPMtx * shModelMtx;//model to projection
 
-	//Set Uniform
-	m_pShaderPT->setUniform("u_MVPMtx", MVPMtx);//model to projection
+		//Set Uniform
+		m_pShaderPT->setUniform("u_MVPMtx", MVPMtx);//model to projection
 
-	m_pMesh6->renderMesh();
+		m_pMesh6->renderMesh();
+	}
 #endif
+
+#ifdef _2D_DRAW_
+	Texture::deActivate();
+
+	glm::vec3 lookAtPos = eyePos + m_pCamera->getViewDirection();
+	glm::vec3 upDir = m_pCamera->getUpDirection();
+
+	//Test skylightDir
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glPushMatrix();
+	glMatrixMode(GL_PROJECTION);
+	//gluPerspective(45.0f, ((float)m_width / (float)m_height), 0.1, 100.0f);
+	perspectiveGL(45.0f, ((float)m_width / (float)m_height), 0.1, 100.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	util_compat_gluLookAt(eyePos.x, eyePos.y, eyePos.z,
+			  lookAtPos.x, lookAtPos.y, lookAtPos.z,
+			  upDir.x, upDir.y, upDir.z);
+	/*gluLookAt(eyePos.x, eyePos.y, eyePos.z,
+			  lookAtPos.x, lookAtPos.y, lookAtPos.z,
+			  upDir.x, upDir.y, upDir.z);*/
+	//glTranslatef(0.0f, 0.0f, 0.0f);
+	glColor3f(1, 1, 1);
+	glLineWidth(5);
+	glBegin(GL_LINES);
+	glVertex3f(0, 0, 0);
+	glVertex3f(0, 1, 0);
+	glEnd();
+	glLineWidth(1);
+	glPopMatrix();
+	//
+#endif
+
 	GLCALL(glDisable(GL_DEPTH_TEST));
 }

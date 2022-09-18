@@ -33,22 +33,29 @@ bool Texture::loadTexture()
 
 	QImage texImg(path);
 	texImg = texImg.mirrored();
+	texImg = texImg.convertToFormat(QImage::Format::Format_RGBA8888);
 
+	//std::cout << "chk1.1" << "\n";
 	GLCALL(glGenTextures(1, &m_texID));
 	GLCALL(glBindTexture(GL_TEXTURE_2D, m_texID));
 
+	//std::cout << "chk1.2" << "\n";
 	GLCALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));//GL_MIRRORED_REPEAT));//GL_REPEAT
 	GLCALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));//GL_MIRRORED_REPEAT));//GL_REPEAT
 	GLCALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
 	GLCALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
+	//std::cout << "chk1.3 width " << texImg.width() << " height " << texImg.height() << "\n";
 	GLCALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
 		texImg.width(), texImg.height(),
-		0, GL_BGRA, GL_UNSIGNED_BYTE,
+		0, GL_RGBA, GL_UNSIGNED_BYTE,//GL_BGRA
 		texImg.bits()));
+	//std::cout << "chk1.4" << "\n";
 	GLCALL(glGenerateMipmap(GL_TEXTURE_2D));
 
+	//std::cout << "chk1.5" << "\n";
 	GLCALL(glBindTexture(GL_TEXTURE_2D, 0));
+	//std::cout << "chk1.6" << "\n";
 	return true;
 }
 

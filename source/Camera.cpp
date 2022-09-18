@@ -114,6 +114,10 @@ glm::vec3 Camera::getViewDirection() const
 	return m_viewDirection;
 }
 
+glm::vec3 Camera::getUpDirection() const
+{
+	return m_up;
+}
 
 void Camera::update()
 {

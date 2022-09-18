@@ -88,9 +88,9 @@ void Model::LoadMesh(aiMesh* mesh, const aiScene* scene)
 			vertices.insert(vertices.end(), { 0.0f, 0.0f, 0.0f });
 		}
 		vertices.insert(vertices.end(),
-						{ -mesh->mNormals[i].x,
-						  -mesh->mNormals[i].y,
-						  -mesh->mNormals[i].z });
+						{ mesh->mNormals[i].x,
+						  mesh->mNormals[i].y,
+						  mesh->mNormals[i].z });
 	}
 
 	//std::cout << "[Debug]: loadMesh chk 2\n";
@@ -144,8 +144,11 @@ void Model::LoadMaterials(const aiScene* scene)
 				std::string filename = std::string(path.data).substr(idx + 1);
 
 				std::string texPath = std::string("Textures/") + filename;
+				
+				//std::cout << texPath << "\n";
 
 				textureList[i] = new Texture(texPath.c_str());
+				//std::cout << "chk1" << "\n";
 
 				if (!textureList[i]->loadTexture())
 				{
@@ -153,6 +156,7 @@ void Model::LoadMaterials(const aiScene* scene)
 					delete textureList[i];
 					textureList[i] = nullptr;
 				}
+				//std::cout << "chk2" << "\n";
 			}
 		}
 

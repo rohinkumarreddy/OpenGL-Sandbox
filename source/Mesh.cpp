@@ -36,7 +36,7 @@ void Mesh::createMesh(shapeType type)
 		shape = ShapeGenerator::makeArrow(profile);
 		break;
 	case shapeType::_PLANE_:
-		shape = ShapeGenerator::makePlane(profile, 2, 2);
+		shape = ShapeGenerator::makePlane(profile, 20, 2);
 		break;
 	case shapeType::_CUBE_:
 		shape = ShapeGenerator::makeCube(profile);

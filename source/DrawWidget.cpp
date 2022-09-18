@@ -81,17 +81,6 @@ void DrawWidget::initializeGL()
 
 void DrawWidget::paintGL()
 {
-
-	//Test skylightDir
-	//glColor3f(1, 1, 1);
-	//glLineWidth(5);
-	//glBegin(GL_LINES);
-	//glVertex3f(0, 0, 0);
-	//glVertex3f(1, 1, 1);
-	//glEnd();
-	//glLineWidth(1);
-	////
-
 	LARGE_INTEGER curTime;
 	/* update timing */
 	QueryPerformanceCounter(&curTime);
