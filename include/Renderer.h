@@ -12,6 +12,7 @@ class Texture;
 class PointLight;
 class SpotLight;
 class DirectionalLight;
+class Material;
 
 class Renderer
 {
@@ -46,6 +47,8 @@ private:
 	Mesh* m_pTexMesh;
 	Model* m_pModel1;
 	Model* m_pModel2;
+	/* Material */
+	Material* m_pMaterial;
 	/* Texture */
 	Texture* m_pTex1;
 	Texture* m_pTex2;

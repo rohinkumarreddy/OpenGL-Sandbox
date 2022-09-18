@@ -6,6 +6,7 @@
 
 #include "SpotLight.h"
 #include "DirectionalLight.h"
+#include "Materials.h"
 
 //#include <string>
 
@@ -232,6 +233,35 @@ template<> bool Shader::setUniform<GLint>(std::string uniform, GLint val)
 	}
 	GLCALL(glUniform1i(m_uniformList[uniform], val));
 	return true;
+}
+
+template<class T> void Shader::initMaterial(T)
+{
+	std::cerr << "[Warning]: Unsupported material type used " << std::endl;
+	return false;
+}
+
+template<> void Shader::initMaterial(Material* material)
+{
+	this->addUniforms(std::vector<std::string>
+	{
+		"u_material.specularIntensity",
+		"u_material.shininess"
+	});
+	setUniform("u_material.specularIntensity", material->getSpecularIntensity());
+	setUniform("u_material.shininess", material->getShininess());
+}
+
+template<class T> void Shader::useMaterial(T)
+{
+	std::cerr << "[Warning]: Unsupported material type used " << std::endl;
+	return false;
+}
+
+template<> void Shader::useMaterial(Material* material)
+{
+	setUniform("u_material.specularIntensity", material->getSpecularIntensity());
+	setUniform("u_material.shininess", material->getShininess());
 }
 
 template<class T> bool Shader::addLightSource(T)

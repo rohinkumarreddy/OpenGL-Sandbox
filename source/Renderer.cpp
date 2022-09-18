@@ -14,6 +14,7 @@
 #include "lightData.h"
 #include "SpotLight.h"
 #include "DirectionalLight.h"
+#include "Materials.h"
 
 //#define _2D_DRAW_
 
@@ -71,7 +72,8 @@ Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	m_height(height),
 	m_PixRatio(pixelRatio),
 	m_pCamera(nullptr),
-	m_pDirectionalLight(new DirectionalLight())
+	m_pDirectionalLight(new DirectionalLight()),
+	m_pMaterial(new Material(4.0f, 256.0f))
 {
 	m_PointLightVec.push_back(new PointLight());
 	m_PointLightVec.push_back(new PointLight());
@@ -165,6 +167,10 @@ Renderer::~Renderer()
 	if (m_pDirectionalLight != nullptr)
 		delete m_pDirectionalLight;
 	m_pDirectionalLight = nullptr;
+
+	if (m_pMaterial != nullptr)
+		delete m_pMaterial;
+	m_pMaterial = nullptr;
 }
 
 void Renderer::initialize()
@@ -212,11 +218,10 @@ void Renderer::initialize()
 		"u_MVPMtx",
 		"u_eyePos",
 		"u_MWMtx",
-		"u_material.specularIntensity",
-		"u_material.shininess",
 		"u_pointLightCount",
 		"u_spotLightCount"
 	});
+	m_pTexShader->initMaterial(m_pMaterial);
 
 	/* Add light sources */
 	m_pTexShader->addLightSource(m_pDirectionalLight);
@@ -235,7 +240,7 @@ void Renderer::initialize()
 	/* Query uniform */
 	m_pShaderPT->initUniforms(std::vector<std::string>{"u_MVPMtx"});
 
-	m_pModel1->LoadModel("D:/Workplace/OpenGLTuT/Udemy-BenCook/Sandbox/Models/ISS_2016.obj");//uh60.obj");
+	m_pModel1->LoadModel("D:/Workplace/OpenGLTuT/Udemy-BenCook/Sandbox/Models/uh60.obj");//ISS_2016.obj");
 	m_pModel2->LoadModel("D:/Workplace/OpenGLTuT/Udemy-BenCook/Sandbox/Models/helmet.obj");//x-wing.obj");
 }
 
@@ -347,8 +352,7 @@ void Renderer::draw()
 
 	m_pTexShader->setUniform("u_pointLightCount", PointLight::getLightCount());
 	m_pTexShader->setUniform("u_spotLightCount", SpotLight::getLightCount());
-	m_pTexShader->setUniform("u_material.specularIntensity", 4.0f);
-	m_pTexShader->setUniform("u_material.shininess", 256.0f);
+	m_pTexShader->useMaterial(m_pMaterial);
 
 	//Shape-5|cube
 	glm::mat4 shModelMtx = glm::translate(glm::vec3(0.5f, 0.25f, 1.0f)) *
@@ -413,13 +417,13 @@ void Renderer::draw()
 	//model = glm::translate(model, glm::vec3(-7.0f, 0.0f, 10.0f));
 	//model = glm::scale(model, glm::vec3(0.006f, 0.006f, 0.006f));
 	//
-	/*shModelMtx = glm::translate(glm::vec3(2.0f, 0.5f, 0.0f)) *
+	shModelMtx = glm::translate(glm::vec3(2.0f, 0.5f, 0.0f)) *
 				 glm::scale(glm::vec3(0.125f, 0.125f, 0.125f)) *
 				 glm::rotate(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f)) *
-				 glm::rotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));*/
-	shModelMtx = glm::translate(glm::vec3(2.0f, 2.0f, 0.0f)) *
-				 glm::rotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) *
-				 glm::scale(glm::vec3(0.001f, 0.001f, 0.001f));//model to world
+				 glm::rotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	//shModelMtx = glm::translate(glm::vec3(2.0f, 2.0f, 0.0f)) *
+	//			 glm::rotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) *
+	//			 glm::scale(glm::vec3(0.001f, 0.001f, 0.001f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
 
 	//Set Uniform

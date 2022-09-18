@@ -84,6 +84,9 @@
     <ClInclude Include="include\Model.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Materials.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="include\DrawWidget.h">
@@ -158,6 +161,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="source\Model.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\Materials.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

@@ -188,6 +188,7 @@
     <ClInclude Include="include\IndexBuffer.h" />
     <ClInclude Include="include\Light.h" />
     <ClInclude Include="include\lightData.h" />
+    <ClInclude Include="include\Materials.h" />
     <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\Model.h" />
     <ClInclude Include="include\PointLight.h" />
@@ -215,6 +216,7 @@
     <ClCompile Include="source\IndexBuffer.cpp" />
     <ClCompile Include="source\Light.cpp" />
     <ClCompile Include="source\main.cpp" />
+    <ClCompile Include="source\Materials.cpp" />
     <ClCompile Include="source\Mesh.cpp" />
     <ClCompile Include="source\Model.cpp" />
     <ClCompile Include="source\PointLight.cpp" />
