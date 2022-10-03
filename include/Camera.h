@@ -63,12 +63,12 @@ private:
 	std::vector<glm::vec3> m_camMoveDeltaAvg;//calculate average of recent 5 delta
 	int m_camMoveDeltaAvgCnt;//count number of saved delta's
 
-	static const float Camera::MOUSE_PAN_SPEED;
-	static const float Camera::MOVEMENT_SPEED;
-	static const float Camera::MOUSE_TURN_SPEED;
-	static const float Camera::MAX_MOUSE_DELTA;
-	static const float Camera::MIN_MOUSE_DELTA;
-	static const float Camera::MAX_PITCH;
-	static const float Camera::MIN_PITCH;
-	static const unsigned int Camera::MAX_SAMPLE_MOVE_AVG;
+	static const float MOUSE_PAN_SPEED;
+	static const float MOVEMENT_SPEED;
+	static const float MOUSE_TURN_SPEED;
+	static const float MAX_MOUSE_DELTA;
+	static const float MIN_MOUSE_DELTA;
+	static const float MAX_PITCH;
+	static const float MIN_PITCH;
+	static const unsigned int MAX_SAMPLE_MOVE_AVG;
 };

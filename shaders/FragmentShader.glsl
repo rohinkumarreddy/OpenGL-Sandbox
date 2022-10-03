@@ -89,7 +89,7 @@ vec4 CalcLightByDirection(Light light, vec3 direction)
 	
 	vec4 specularLight = vec4(0, 0, 0, 0);
 	
-//	if(diffuseFactor > 0.0f)
+	if(diffuseFactor > 0.0f)
 	{
 		//vector from point of illumination to the eye
 		vec3 eyeVec = normalize(u_eyePos - p_pos);

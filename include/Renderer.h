@@ -48,7 +48,8 @@ private:
 	Model* m_pModel1;
 	Model* m_pModel2;
 	/* Material */
-	Material* m_pMaterial;
+	Material* m_pShinyMaterial;
+	Material* m_pDullMaterial;
 	/* Texture */
 	Texture* m_pTex1;
 	Texture* m_pTex2;

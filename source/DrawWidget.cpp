@@ -24,6 +24,10 @@
 //const uint NUM_FLOATS_PER_VTX = 6;
 //const uint TRIANGLE_BYTE_SIZE = NUM_VERTICES_PER_TRI * NUM_FLOATS_PER_VTX * sizeof(float);
 //const uint MAX_TRIS = 20;
+const unsigned int FPS_SAMPLES = 10;
+double fpsAvgSum = 0, fpsAvg = 0;
+std::vector<double> fpsVals;
+uint fpsAvgCount = 0;
 
 DrawWidget::DrawWidget(QWidget* parent)
 	: QOpenGLWidget(parent),
@@ -34,10 +38,11 @@ DrawWidget::DrawWidget(QWidget* parent)
 	m_timeDelta(0),
 	m_leftBtnPressed(false),
 	m_rightBtnPressed(false),
-	m_middleBtnPressed(false)
+	m_middleBtnPressed(false),
+	m_ImGUIMouseIn(false)
 {
 	QSurfaceFormat fmt = this->format();
-	//fmt.setSwapInterval(0);//VSYNC
+	fmt.setSwapInterval(0);//VSYNC
 	fmt.setSamples(4);//AntiAliasing
 	fmt.setSwapBehavior(QSurfaceFormat::SwapBehavior::DoubleBuffer);
 	this->setFormat(fmt);
@@ -51,6 +56,10 @@ DrawWidget::DrawWidget(QWidget* parent)
 	QueryPerformanceFrequency(&m_freq);
 	QueryPerformanceCounter(&m_prevTime);
 	//std::cout<<"double buffer "<<(doubleBuffer() ? "true\n" : "false\n");
+	fpsAvgSum = 0;
+	fpsAvg = 0;
+	fpsAvgCount = 0;
+	fpsVals = std::vector<double>(FPS_SAMPLES, 0);
 }
 
 DrawWidget::~DrawWidget()
@@ -77,6 +86,7 @@ void DrawWidget::initializeGL()
 	m_pRenderer->initialize();
 	m_pRenderer->setCameraRef(m_pCamera);
 	QtImGui::initialize(this);
+	ImGui::StyleColorsDark();
 }
 
 void DrawWidget::paintGL()
@@ -85,7 +95,6 @@ void DrawWidget::paintGL()
 	/* update timing */
 	QueryPerformanceCounter(&curTime);
 	QtImGui::newFrame();
-	//ImGui::Begin();
 	//ImGui::Text("Hello, world!");
 	//if (m_prevTime > 0)
 	{
@@ -102,8 +111,31 @@ void DrawWidget::paintGL()
 			//m_pCamera->update();
 		}
 		//std::cout << "time delta " << timeDelta << std::endl;
+		ImGui::Begin("Test", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize);
+		char fpsStr[1024] = { 0 };
+		//fpsAvgCount++;
+		//if (fpsVals.size() < FPS_SAMPLES)
+		{
+			fpsAvg = 1.0f / timeDelta;
+		}
+		/*else
+		if (fpsVals.size() >= FPS_SAMPLES && fpsAvgCount >= FPS_SAMPLES)
+		{
+			fpsAvgCount = 0;
+			fpsAvg = fpsAvgSum - fpsVals[0];
+		}
+		else
+		{
+			fpsAvgSum += 1.0f / timeDelta;
+		}*/
+		sprintf(fpsStr, "@%0.2f fps", fpsAvg);
+		ImGui::Text(fpsStr);
+		//ImGui::ShowDemoWindow();
 	}
-	QueryPerformanceCounter(&m_prevTime);//update previous time
+	m_prevTime = curTime;//update previous time
+	//QueryPerformanceCounter(&m_prevTime);//update previous time
+	m_ImGUIMouseIn = ImGui::IsAnyItemActive();//IsItemHovered();
+	ImGui::End();
 	//std::cout << "chk2\n";
 	m_pRenderer->draw();
 	//std::cout << "chk5\n";
@@ -133,7 +165,9 @@ void DrawWidget::timerEvent(QTimerEvent* e)
 
 void DrawWidget::mouseMoveEvent(QMouseEvent* e)
 {
-	QOpenGLWidget *wgt = new QOpenGLWidget();
+	if(m_ImGUIMouseIn == false)
+	{
+	//QOpenGLWidget *wgt = new QOpenGLWidget();
 	//current mouse position
 	glm::vec2 prevMousePos(m_prevX, m_prevY);
 	//current mouse position
@@ -166,6 +200,7 @@ void DrawWidget::mouseMoveEvent(QMouseEvent* e)
 	m_prevX = lastPos.x();
 	m_prevY = lastPos.y();
 #endif
+	}
 	QOpenGLWidget::mouseMoveEvent(e);
 	//repaint();
 }

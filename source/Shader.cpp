@@ -150,7 +150,7 @@ void Shader::deactivate()
 void Shader::initUniforms(std::vector<std::string> uniformLst)
 {
 	m_uniformList.clear();
-	for each (std::string var in uniformLst)
+	for (std::string var : uniformLst)
 	{
 		GLuint uniformLoc = 0;
 		GLCALL(uniformLoc = glGetUniformLocation(m_Program, var.c_str()));
@@ -160,7 +160,7 @@ void Shader::initUniforms(std::vector<std::string> uniformLst)
 
 void Shader::addUniforms(std::vector<std::string> uniformLst)
 {
-	for each (std::string var in uniformLst)
+	for (std::string var : uniformLst)
 	{
 		GLuint uniformLoc = 0;
 		GLCALL(uniformLoc = glGetUniformLocation(m_Program, var.c_str()));

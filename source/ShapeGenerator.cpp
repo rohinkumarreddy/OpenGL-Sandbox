@@ -799,7 +799,7 @@ ShapeData ShapeGenerator::makePlaneVerts(unsigned int dimensions, unsigned int t
 			thisVert.position.x = j - half;
 			thisVert.position.z = i - half;
 			thisVert.position.y = 0;
-			if(texRepeat)
+			if(texRepeat > 1)
 				thisVert.texture = glm::vec3((float)i / (float)(texRepeat - 1),
 											 (float)j / (float)(texRepeat - 1), 0.0f);
 			else

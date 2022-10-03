@@ -64,8 +64,8 @@ Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	m_pTexMesh(new Mesh),
 	m_pModel1(new Model),
 	m_pModel2(new Model),
-	m_pTex1(new Texture("Textures/brick.png")),
-	m_pTex2(new Texture("Textures/plain.png")),
+	m_pTex1(new Texture("Textures/bricks.png")),//bricks
+	m_pTex2(new Texture("Textures/brick.png")),//plain
 	m_pTex3(new Texture("Textures/tiles.png")),
 	m_timeDelta(NULL),
 	m_width(width),
@@ -73,12 +73,13 @@ Renderer::Renderer(unsigned int width, unsigned int height, float pixelRatio)
 	m_PixRatio(pixelRatio),
 	m_pCamera(nullptr),
 	m_pDirectionalLight(new DirectionalLight()),
-	m_pMaterial(new Material(4.0f, 256.0f))
+	m_pShinyMaterial(new Material(4.0f, 256.0f)),
+	m_pDullMaterial(new Material(0.3f, 4.0f))
 {
+	/*m_PointLightVec.push_back(new PointLight());
 	m_PointLightVec.push_back(new PointLight());
-	m_PointLightVec.push_back(new PointLight());
-	m_PointLightVec.push_back(new PointLight());
-	m_spotLightVec.push_back(new SpotLight());
+	m_PointLightVec.push_back(new PointLight());*/
+	//m_spotLightVec.push_back(new SpotLight());
 }
 
 Renderer::~Renderer()
@@ -146,7 +147,7 @@ Renderer::~Renderer()
 	//Clean-up lights
 	if (!m_PointLightVec.empty())
 	{
-		for each (auto var in m_PointLightVec)
+		for (auto var : m_PointLightVec)
 		{
 			if (var != nullptr)
 				delete var;
@@ -156,7 +157,7 @@ Renderer::~Renderer()
 	}
 	if (!m_spotLightVec.empty())
 	{
-		for each (auto var in m_spotLightVec)
+		for (auto var : m_spotLightVec)
 		{
 			if (var != nullptr)
 				delete var;
@@ -168,9 +169,12 @@ Renderer::~Renderer()
 		delete m_pDirectionalLight;
 	m_pDirectionalLight = nullptr;
 
-	if (m_pMaterial != nullptr)
-		delete m_pMaterial;
-	m_pMaterial = nullptr;
+	if (m_pShinyMaterial != nullptr)
+		delete m_pShinyMaterial;
+	m_pShinyMaterial = nullptr;
+	if (m_pDullMaterial != nullptr)
+		delete m_pDullMaterial;
+	m_pDullMaterial = nullptr;
 }
 
 void Renderer::initialize()
@@ -221,15 +225,15 @@ void Renderer::initialize()
 		"u_pointLightCount",
 		"u_spotLightCount"
 	});
-	m_pTexShader->initMaterial(m_pMaterial);
+	m_pTexShader->initMaterial(m_pShinyMaterial);
 
 	/* Add light sources */
 	m_pTexShader->addLightSource(m_pDirectionalLight);
-	for each (auto var in m_PointLightVec)
+	for (auto var : m_PointLightVec)
 	{
 		m_pTexShader->addLightSource(var);
 	}
-	for each (auto var in m_spotLightVec)
+	for (auto var : m_spotLightVec)
 	{
 		m_pTexShader->addLightSource(var);
 	}
@@ -302,7 +306,7 @@ void Renderer::draw()
 	glm::vec3 viewDir = m_pCamera->getViewDirection();//view direction|world space
 
 	//Ambient-light|Diffused-light
-	m_pDirectionalLight->setIntensity(0.005f, 0.3f);
+	m_pDirectionalLight->setIntensity(0.1f, 0.5f);
 	m_pDirectionalLight->setColor(1.0f, 1.0f, 1.0f);
 
 	//Light-source
@@ -310,7 +314,7 @@ void Renderer::draw()
 	{
 		glm::vec3 skylightDir = glm::vec3(0.0f, -1.0f, 0.0f);//(glm::vec3(0.0f, 0.0f, 0.0f) - glm::vec3(m_pLightData->pos.x, 20, m_pLightData->pos.z));
 		skylightDir /= skylightDir.length();
-		for each (auto var in m_PointLightVec)
+		for (auto var : m_PointLightVec)
 		{
 			var->setIntensity(0.005f, 0.2f);
 			var->setPosition(m_pLightData->pos.x + (pow(-1, var->getLightIndex()) * (var->getLightIndex() > 0) * 9.0f),
@@ -319,7 +323,7 @@ void Renderer::draw()
 			//Light attenuation(kC, kL, kQ)
 			var->setAttenuation(m_pLightData->attenuation);
 		}
-		for each (auto var in m_spotLightVec)
+		for (auto var : m_spotLightVec)
 		{
 			var->setIntensity(0.005f, 0.05f);
 			var->setPosition(m_pLightData->pos.x,
@@ -345,14 +349,14 @@ void Renderer::draw()
 	}
 
 	/* Select texture */
-	m_pTex1->activate();
+	m_pTex2->activate();
 
 	/* Select shader program */
 	m_pTexShader->activate();
 
 	m_pTexShader->setUniform("u_pointLightCount", PointLight::getLightCount());
 	m_pTexShader->setUniform("u_spotLightCount", SpotLight::getLightCount());
-	m_pTexShader->useMaterial(m_pMaterial);
+	m_pTexShader->useMaterial(m_pDullMaterial);
 
 	//Shape-5|cube
 	glm::mat4 shModelMtx = glm::translate(glm::vec3(0.5f, 0.25f, 1.0f)) *
@@ -364,11 +368,11 @@ void Renderer::draw()
 	m_pTexShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
 	m_pTexShader->setUniform("u_MWMtx", shModelMtx);//model to world
 	//Set-up light
-	for each (auto var in m_PointLightVec)
+	for (auto var : m_PointLightVec)
 	{
 		var->UseLight(m_pTexShader);
 	}
-	for each (auto var in m_spotLightVec)
+	for (auto var : m_spotLightVec)
 	{
 		var->UseLight(m_pTexShader);
 	}
@@ -399,7 +403,7 @@ void Renderer::draw()
 	m_pMesh5->renderMesh();
 #endif
 	/* Select texture */
-	m_pTex2->activate();
+	m_pTex1->activate();
 	//Shape-3|plane
 	shModelMtx = glm::mat4(1.0f);//model to world
 	//shModelMtx = glm::translate(glm::vec3(20.0f, 0.0f, 20.0f)) *
@@ -425,6 +429,8 @@ void Renderer::draw()
 	//			 glm::rotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) *
 	//			 glm::scale(glm::vec3(0.001f, 0.001f, 0.001f));//model to world
 	MVPMtx = VPMtx * shModelMtx;//model to projection
+	
+	m_pTexShader->useMaterial(m_pShinyMaterial);
 
 	//Set Uniform
 	m_pTexShader->setUniform("u_MVPMtx", MVPMtx);//model to projection
@@ -458,10 +464,22 @@ void Renderer::draw()
 	/* Select shader program */
 	m_pShaderPT->activate();
 
-	for each (auto var in m_PointLightVec)
+	for (auto var : m_PointLightVec)
 	{
 		//Shape-4|sphere|light source
 		shModelMtx = glm::translate(var->getPosition()) * glm::scale(glm::vec3(0.0625f, 0.0625f, 0.0625f));//model to world
+		MVPMtx = VPMtx * shModelMtx;//model to projection
+
+		//Set Uniform
+		m_pShaderPT->setUniform("u_MVPMtx", MVPMtx);//model to projection
+
+		m_pMesh6->renderMesh();
+	}
+
+	if (m_pDirectionalLight!=nullptr)
+	{
+		//Shape-4|sphere|light source
+		shModelMtx = glm::translate(-m_pDirectionalLight->getDirection()*50.0f) * glm::scale(glm::vec3(0.5f, 0.5f, 0.5f));//model to world
 		MVPMtx = VPMtx * shModelMtx;//model to projection
 
 		//Set Uniform
@@ -473,6 +491,7 @@ void Renderer::draw()
 
 #ifdef _2D_DRAW_
 	Texture::deActivate();
+	Shader::deactivate();
 
 	glm::vec3 lookAtPos = eyePos + m_pCamera->getViewDirection();
 	glm::vec3 upDir = m_pCamera->getUpDirection();
@@ -480,23 +499,50 @@ void Renderer::draw()
 	//Test skylightDir
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPushMatrix();
-	glMatrixMode(GL_PROJECTION);
+	//glMatrixMode(GL_PROJECTION);
 	//gluPerspective(45.0f, ((float)m_width / (float)m_height), 0.1, 100.0f);
-	perspectiveGL(45.0f, ((float)m_width / (float)m_height), 0.1, 100.0f);
+	//perspectiveGL(60.0f, ((float)m_width / (float)m_height), 0.1, 100.0f);
+	/*glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	util_compat_gluLookAt(eyePos.x, eyePos.y, eyePos.z,
+	glLoadIdentity();*/
+	/*util_compat_gluLookAt(eyePos.x, eyePos.y, eyePos.z,
 			  lookAtPos.x, lookAtPos.y, lookAtPos.z,
-			  upDir.x, upDir.y, upDir.z);
+			  upDir.x, upDir.y, upDir.z);*/
 	/*gluLookAt(eyePos.x, eyePos.y, eyePos.z,
 			  lookAtPos.x, lookAtPos.y, lookAtPos.z,
 			  upDir.x, upDir.y, upDir.z);*/
+			  //Find the aspect ratio of the window.
+	GLfloat dOrthoSize = 1.0f;
+	GLdouble AspectRatio = (GLdouble)(m_width) / (GLdouble)(m_height);
+	//glViewport( 0, 0, cx , cy );
+	glViewport(0, 0, m_width, m_height);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	//Set the orthographic projection.
+	if (m_width <= m_height)
+	{
+		glOrtho(-dOrthoSize, dOrthoSize, -(dOrthoSize / AspectRatio),
+			dOrthoSize / AspectRatio, 2.0f * -dOrthoSize, 2.0f * dOrthoSize);
+	}
+	else
+	{
+		glOrtho(-dOrthoSize * AspectRatio, dOrthoSize * AspectRatio,
+			-dOrthoSize, dOrthoSize, 2.0f * -dOrthoSize, 2.0f * dOrthoSize);
+	}
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
 	//glTranslatef(0.0f, 0.0f, 0.0f);
+	glTranslatef(0.5f, 0.5f, 0.5f);
+	glTranslatef(-0.5f, -0.5f, -0.5f);
+
 	glColor3f(1, 1, 1);
 	glLineWidth(5);
 	glBegin(GL_LINES);
 	glVertex3f(0, 0, 0);
-	glVertex3f(0, 1, 0);
+	glVertex3f(0, 3, 0);
 	glEnd();
 	glLineWidth(1);
 	glPopMatrix();

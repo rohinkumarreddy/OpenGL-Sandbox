@@ -53,7 +53,7 @@ bool VertexAttribute::fillAttribListfromProfile(	VertexAttributeProfile& profile
 size_t VertexAttribute::computeVertexByteOffset(const std::vector<VertexAttribute>& attributes)
 {
 	size_t tsize = 0;
-	for each (auto atrb in attributes)
+	for (auto atrb : attributes)
 		tsize += atrb.size();
 	return tsize;
 }

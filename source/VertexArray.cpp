@@ -25,7 +25,7 @@ void VertexArray::addBuffer(const VertexBuffer& vb,
 	{
 		size_t _ATTRIBUTE_OFFSET_ = 0;
 		int atrbId = 0;
-		for each (auto atrb in attributes)
+		for (auto atrb : attributes)
 		{
 			atrb.init(atrbId, _VERTEX_BYTE_SIZE_, _ATTRIBUTE_OFFSET_);
 			_ATTRIBUTE_OFFSET_ += atrb.size();

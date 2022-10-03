@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QOpenGLWidget>
+#include <QtOpenGLWidgets\QOpenGLWidget>
 
 //forward declaration
 class QWidget;
@@ -44,6 +44,7 @@ private:
 	bool m_leftBtnPressed;
 	bool m_middleBtnPressed;
 	bool m_rightBtnPressed;
+	bool m_ImGUIMouseIn;
 	/* Frame timing */
 	double m_timeDelta;
 	//LARGE_INTEGER m_curTime;

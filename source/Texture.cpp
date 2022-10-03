@@ -42,8 +42,8 @@ bool Texture::loadTexture()
 	//std::cout << "chk1.2" << "\n";
 	GLCALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));//GL_MIRRORED_REPEAT));//GL_REPEAT
 	GLCALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));//GL_MIRRORED_REPEAT));//GL_REPEAT
-	GLCALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-	GLCALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+	GLCALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));//GL_LINEAR
+	GLCALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));//GL_LINEAR
 
 	//std::cout << "chk1.3 width " << texImg.width() << " height " << texImg.height() << "\n";
 	GLCALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
