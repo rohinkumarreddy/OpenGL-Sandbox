@@ -10,7 +10,8 @@ public:
 	Texture(const std::string& filepath);
 	Texture();
 	~Texture();
-	bool loadTexture();
+	bool build();
+	bool load(const std::string& filepath = "");
 	void activate();
 	void clear();
 	static void deActivate();

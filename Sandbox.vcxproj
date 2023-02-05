@@ -201,6 +201,7 @@
     <ClInclude Include="include\PointLight.h" />
     <ClInclude Include="include\Renderer.h" />
     <ClInclude Include="include\Shader.h" />
+    <ClInclude Include="include\ShadowMap.h" />
     <ClInclude Include="include\ShapeData.h" />
     <ClInclude Include="include\ShapeGenerator.h" />
     <ClInclude Include="include\SpotLight.h" />
@@ -230,6 +231,7 @@
     <ClCompile Include="source\Renderer.cpp" />
     <ClCompile Include="source\SandboxMainWindow.cpp" />
     <ClCompile Include="source\Shader.cpp" />
+    <ClCompile Include="source\ShadowMap.cpp" />
     <ClCompile Include="source\ShapeGenerator.cpp" />
     <ClCompile Include="source\SpotLight.cpp" />
     <ClCompile Include="source\Texture.cpp" />

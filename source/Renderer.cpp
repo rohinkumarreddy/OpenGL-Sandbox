@@ -276,9 +276,9 @@ void Renderer::setupScene()
 	m_pTexMesh->createMesh(Mesh::shapeType::_CUBE_);
 
 	/* Load Textures */
-	m_pTex1->loadTexture();
-	m_pTex2->loadTexture();
-	m_pTex3->loadTexture();
+	m_pTex1->load();
+	m_pTex2->load();
+	m_pTex3->load();
 }
 
 void Renderer::draw()

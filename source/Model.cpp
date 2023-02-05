@@ -150,7 +150,7 @@ void Model::LoadMaterials(const aiScene* scene)
 				textureList[i] = new Texture(texPath.c_str());
 				//std::cout << "chk1" << "\n";
 
-				if (!textureList[i]->loadTexture())
+				if (!textureList[i]->load())
 				{
 					printf("Failed to load texture at: %s\n", texPath.c_str());
 					delete textureList[i];
@@ -163,7 +163,7 @@ void Model::LoadMaterials(const aiScene* scene)
 		if (!textureList[i])
 		{
 			textureList[i] = new Texture("Textures/plain.png");//brick.png
-			textureList[i]->loadTexture();
+			textureList[i]->load();
 		}
 	}
 }
