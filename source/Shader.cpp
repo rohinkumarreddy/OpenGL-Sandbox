@@ -25,7 +25,6 @@ std::string readSrc(const char* fileName)
 	}
 }
 
-
 bool checkShaderBuild(GLuint build,
 	PFNGLGETSHADERIVPROC getBuildProperty,
 	PFNGLGETSHADERINFOLOGPROC getBuildInfoLog,

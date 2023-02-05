@@ -147,6 +147,7 @@ void DrawWidget::resizeEvent(QResizeEvent* e)
 {
 	m_pRenderer->setWidth(width());
 	m_pRenderer->setHeight(height());
+	m_pRenderer->setPixelRatio(devicePixelRatio());
 	//repaint();
 	//Q_UNUSED(e);
 	QOpenGLWidget::resizeEvent(e);

@@ -213,7 +213,7 @@ void Renderer::initialize()
 		"u_MWMtx",
 		"u_lAttenuationFac"});
 
-	/* Select shader */
+	/* Select texture shader */
 	m_pTexShader->activate();
 
 	/* Query uniform */
@@ -238,7 +238,7 @@ void Renderer::initialize()
 		m_pTexShader->addLightSource(var);
 	}
 
-	/* Select shader */
+	/* Select pass through shader */
 	m_pShaderPT->activate();
 
 	/* Query uniform */
