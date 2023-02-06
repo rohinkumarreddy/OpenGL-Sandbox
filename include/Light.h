@@ -2,15 +2,18 @@
 
 #include <GL\glew.h>
 #include <glm\glm.hpp>
+#include <glm\gtc\matrix_transform.hpp>
 
 //forward declaration
 class Shader;
+class ShadowMap;
 
 class Light
 {
 public:
 	Light();
-	Light(GLfloat red, GLfloat green, GLfloat blue,
+	Light(GLuint shadowWidth, GLuint shadowHeight,
+		GLfloat red, GLfloat green, GLfloat blue,
 		GLfloat aIntensity, GLfloat dIntensity);
 
 	~Light();
@@ -46,6 +49,11 @@ public:
 		return m_diffuseIntensity;
 	}
 
+	inline ShadowMap* getShadowMap()
+	{
+		return m_pShadowMap;
+	}
+
 protected:
 	glm::vec3 m_color;
 	GLfloat m_ambientIntensity;
@@ -53,6 +61,8 @@ protected:
 	void UseLight(	GLuint ambientIntensityLocation,
 					GLuint ambientColourLocation,
 					GLuint diffuseIntensityLocation	);
+	glm::mat4 m_lightProjMtx;
+	ShadowMap* m_pShadowMap;
 	//void UseLight(Shader* p_shader);
 };
 

@@ -1,6 +1,7 @@
 #include "Light.h"
 #include "Shader.h"
 #include "common.h"
+#include "ShadowMap.h"
 
 Light::Light()
 {
@@ -9,11 +10,16 @@ Light::Light()
 	m_diffuseIntensity = 1.0f;
 }
 
-Light::Light(GLfloat red, GLfloat green, GLfloat blue, GLfloat aIntensity, GLfloat dIntensity)
+Light::Light(GLuint shadowWidth, GLuint shadowHeight,
+	GLfloat red, GLfloat green, GLfloat blue,
+	GLfloat aIntensity, GLfloat dIntensity)
 {
 	m_color = glm::vec3(red, green, blue);
 	m_ambientIntensity = aIntensity;
 	m_diffuseIntensity = dIntensity;
+	
+	m_pShadowMap = new ShadowMap();
+	m_pShadowMap->Init(shadowWidth, shadowHeight);
 }
 
 void Light::UseLight(	GLuint ambientIntensityLocation,

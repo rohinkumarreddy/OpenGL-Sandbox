@@ -24,7 +24,7 @@ PointLight::PointLight(	GLfloat red, GLfloat green, GLfloat blue,
 						GLfloat aIntensity, GLfloat dIntensity,
 						GLfloat xPos, GLfloat yPos, GLfloat zPos,
 						GLfloat con, GLfloat lin, GLfloat exp, GLfloat cut, bool skipIndx)
-	: Light(red, green, blue, aIntensity, dIntensity)
+	: Light(1024, 1024, red, green, blue, aIntensity, dIntensity)
 {
 	m_lightIndx = -1;
 	m_SkipIndx = skipIndx;
